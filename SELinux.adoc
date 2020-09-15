@@ -1,0 +1,157 @@
+= SELinux
+Created Freitag 04 September 2020
+
+== Research:
+
+Dan Walsh SELinux visual policy guide
+<https://opensource.com/business/13/11/selinux-policy-guide>
+
+GitHub
+<https://github.com/SELinuxProject/>
+
+SELinux Overview
+<https://github.com/SELinuxProject/selinux-notebook/blob/main/src/selinux_overview.md>
+
+RHEL Labs
+<https://lab.redhat.com/>
+SELinux Lab: <https://lab.redhat.com/selinux-containers>
+
+discretionary access control  DAC
+<https://en.wikipedia.org/wiki/Discretionary_access_control>
+
+<https://stopdisablingselinux.com/>
+<https://major.io/2013/04/15/seriously-stop-disabling-selinux/>
+
+Container Types, introduction Udica
+<https://danwalsh.livejournal.com/81756.html>
+
+== Ideen
+
+* Wenig Historie, nur wenn Zeit
+* Motivieren, warum ist SELinux wichtig
+* Zeigen, wie mal Policies generiert
+* Abgrenzung zu AppAmore
+* Beispiele auf labs.redhat.com durchgehen
+* Nicht zu tief in die MAC untiefe steuern
+
+
+== Video Script
+
+**Intro / Hook**
+
+* Warum kann mein Programm diese Datei nicht lesen, ich habe doch alle Zugriffsrechte?
+* Was ist SELinux und Wie kann es mir helfen Programme sicherer zu machen?
+* Und warum solltet ihr Dan Walsh nicht zum weinen bringen?
+* Das und mehr erkläre ich euch in diesem Video
+
+**Tagline**
+
+* Hallo Ich bin Felix Meulenkamp,
+* Consulting Architect für OpenShift Clouds bei Red Hat
+* und erkläre euch in dieser Reihe Linux Security Basics
+
+**Content**
+
+* SELinux zählt zu den Mandatory Access Control Systemen MAC, wie zB. AppAmore oder Windows Systeme Mandatory Integrity Control MIC,
+* MAC: Security Admin controlls Policies
+* vs discretionary access control  DAC
+* DAC: Owner controlls access eg. RWX-Filemode
+
+**Motivate**
+
+* Confine an application to only what it is allowed to
+* Apache Webserver, nur Zugriff, auf was die Policies erlauben
+* CVE-2019-5736 <https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux>
+* Schwachstelle im "runc" welches von vielen Container Runtimes benutzt wird, bei dem die executable über [/proc/self/exe](file:///proc/self/exe) überschreibbar war
+* SELinux hat dies geblockt
+
+**Labels, Policies, Subjects, Objects**
+
+* Alles bekommt ein Label, ein Security-Context
+* ``user:role:type[:range]`` **Einblendung "ls -lZ"**
+* Im Dateisystem als xAttr
+* ``getfattr -n security.selinux myfile``
+* Policies: Access Vector Rules
+* ``sesearch -A -s httpd_t -c file -ds | head -10``
+* rule_name source_type target_type : class perm_set;
+* Subjects: User, Prozess
+* Objects: File, Socket, IPC, Capabilities...etc.
+* ``semanage fcontext -l |grep /var/www |head -10``
+* ``semanage *  boolean -l | sed -n '1,2p;/http/Ip'``
+* Booleans
+* Type Enforcing vs Multi-Level Security (MLS)  / Multi-Category Security (MCS)
+
+
+**Probleme / Cornercases**
+
+* Verhindert kein Buffer-Overflow und Co
+* Verhindert keinen Zugriff auf Resourcen, die erlaubt sind
+* SELinux komplex
+* Appamore einfacher, weniger leistungsfähig
+* AA nur nach Pfaden
+* Container und VMs laufen in einem MLS und brauche trotzdem manchmal mehr Zugriff
+* Deswegen MLS/MCS → Für Container Udica
+
+**Outro**
+
+* Das waren erst einmal die wichtigsten Dinge, die man über SELinux wissen sollte
+* Wenn ihr mehr Basics der Linux Security lernen wollt, schaut einfach das nächste Video aus der Reihe
+
+**Beispiele und Kommandos**
+
+* sudo sestatus
+* Beispiele für Module
+** udica als neustes Tool für Container
+** Klassischer Fehler: ein Prozess möchte eine Datei öffnen und hat zwar Zugriffsrechte aber SELinux blockt
+
+
+**Demo**:
+
+[source,console]
+----
+clear
+yum install -y attr setools setools-console.x86_64  udica
+clear
+ls -lZ | head -5
+#ZEIGEN
+clear
+getfattr -n security.selinux anaconda-ks.cfg
+clear
+sesearch -A -s httpd_t -c file -ds | head -5
+#ZEIGEN
+clear
+semanage fcontext -l |grep /var/www | head -5
+#ZEIGEN
+clear
+semanage boolean -l | sed -n '1,2p;/http/Ip'  | head -5
+clear
+sestatus
+----
+
+
+[source,console]
+----
+$ sudo semanage boolean -l | sed -n '1,2p;/http/Ip'
+SELinux boolean                State  Default Description
+
+httpd_anon_write               (off  ,  off)  Allow httpd to anon write
+httpd_builtin_scripting        (on   ,   on)  Allow httpd to builtin scripting
+httpd_can_check_spam           (off  ,  off)  Allow httpd to can check spam
+httpd_can_connect_ftp          (off  ,  off)  Allow httpd to can connect ftp
+httpd_can_connect_ldap         (off  ,  off)  Allow httpd to can connect ldap
+httpd_can_connect_mythtv       (off  ,  off)  Allow httpd to can connect mythtv
+httpd_can_connect_zabbix       (off  ,  off)  Allow httpd to can connect zabbix
+httpd_can_network_connect      (off  ,  off)  Allow httpd to can network connect
+httpd_can_network_connect_cobbler (off  ,  off)  Allow httpd to can network connect cobbler
+httpd_can_network_connect_db   (off  ,  off)  Allow httpd to can network connect db
+
+$ sudo sesearch -A -s httpd_t -c file -ds | head -10
+allow httpd_t abrt_etc_t:file { getattr ioctl lock open read };
+allow httpd_t abrt_retrace_spool_t:file { append create getattr ioctl link lock open read rename setattr unlink write };
+allow httpd_t anon_inodefs_t:file { append getattr ioctl lock open read write };
+allow httpd_t antivirus_exec_t:file { execute execute_no_trans getattr ioctl map open read };
+allow httpd_t apcupsd_cgi_ra_content_t:file append; [ httpd_builtin_scripting ]:True
+allow httpd_t apcupsd_cgi_ra_content_t:file create; [ httpd_builtin_scripting ]:True
+allow httpd_t apcupsd_cgi_rw_content_t:file { append create link rename setattr unlink write }; [ httpd_builtin_scripting ]:True
+allow httpd_t apcupsd_cgi_script_exec_t:file { execute execute_no_trans }; [ httpd_enable_cgi ]:True
+----

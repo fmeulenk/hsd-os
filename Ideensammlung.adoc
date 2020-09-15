@@ -1,0 +1,133 @@
+= Ideen zur Vorlesung Betriebssysteme WS2020
+Felix Meulenkamp <fmeulenk@redhat.com>
+
+[abstract]
+== Vorraussetzungen
+
+Alle Seiten- und Kapitelzahlen basieren auf Silberschatz et al. _Operating Systems Concepts_ 10th Edition / Global Edition 2019.
+
+== Ideensammlung
+
+=== Story: Monolithisch zu Microservice
+
+Bei Red Hat wird Kubernetes als das neue Betriebssystem für die Cloud gesehen.
+Neue Produkte werden zunehmend direkt auf Kubernetes portiert.
+
+Somit kann man eine kontinuierliche Entwicklung sehen.
+
+Monolithischen Programme => Bibliotheken / Linking => Interprozesskommunikation Unix Sockets => Interprozesskomunikation RPC / SOAP / REST API / gRPC  => Aufteilung in Microservices => Kubernetes => Eventdriven Serverless
+
+Catchphrase: Moderne Anwendungsentwicklung geschiet mehr und mehr für die Cloud.
+
+=== Story: Patchmanagement und Automatisierung
+
+Silberschatz hat nichts zum Thema Packetierung von Anwendungen und Betriebssystemen.
+Auch hier kann man eine schöne Entwicklung sehen.
+
+Händisches Kopieren => Tar Archive => CPIO => RPM / DEB (mit Metadaten und Abhängigkeiten) => Anwendungsgruppen => App Streams / Module => Container => Kompose => Helm-Charts
+
+Das Thema ist in der freien Wirtschaft enorm wichtig.
+Probleme beim Aufsetzen von Servern und Workstations haben für die Themen Packetmanager getrieben.
+Immer wieder auftretende Probleme mit nicht nicht (korrekt) erfüllten Abhängigkeiten trieben zunächst das Thema Programming-environment virtualization und Automatisierung.
+Heutzutage ist die "Dependency Hell" der Haupttreiber für Container, da dort alle Abhängigkeiten enthalten sind.
+
+Sie entkoppeln das Updatemanagement von Host (Virtualisierungs- oder Container Host) und Anwendung in VM oder Container.
+
+Das bringt aber die Themen, wie mache ich Updates auf meine tausend Maschinen oder wie halte ich meine Container aktuell.
+Damit kommen wir auf das Thema Continious Testing als Teil von CI/CD.
+
+Als Abrundung zu Patchmanagement und Pet vs Cattle könnte zum Thema Automatisierung übergeleitet werden.
+Hier würde Bash vs. Puppet vs. Ansible zB. ein gutes Thema sein.
+
+=== Story: Pet vs. Cattle
+
+Server und Container werden zunehmend als Cattle betrachtet.
+Dies bedeutet, dass die Erstellung, Deploy und Konfiguration vollständig automatisiert wird.
+Wenn im Kubernetes ein Container nicht mehr richtig läuft, wird er terminiert und an seiner Stelle eine frische Kopie ausgerollt.
+
+Das Gleiche gilt oft auch für VMs.
+
+Klassische wurden Pets gebaut.
+Sprich ein Server wurde oftmals von Hand aufgesetzt und Konfiguriert.
+Dies erzeugt einen hohen manuellen Aufwand und deshalb wird dieser Server und die aktuelle Installation immer und immer wieder repariert und "geflickt".
+Dies erzeuggt wiederrum hochgradig spezielle Systeme, "Schneeflocken", welche nicht mehr einheitlich gewartet werden können.
+ZB. durch Tools die zu Troubleshooting-Zwecken installiert wurden und fehlgeschlagenen Updates oder Changes.
+
+Das hat auch zu dem Konzept des ToolBox Containers geführt.
+Ein Container der alle Tools zum Troubleshooting enthält und oftmals priviligiert läuft um alles erreichen zu können.
+Nach erfolgten Troubleshooting wird der Container einfach wieder gelöscht und das System ist wieder sauber.
+
+ToolBox Container: https://github.com/containers/toolbox
+
+== Andere Themen
+
+=== Cgroups / Capabilities / Seccomp
+
+Cgroups setzen Prozessgruppen limits, Nmaespaces, Accounting.
+Frühe Form der Isolierung für Linux Containers wie OpenVZ oder LXC.
+
+Capabilities gruppieren system calls im Kernel nach verschiedenen Zugriffsstufen.
+
+Seccomp erlaubt das feinere Filtern der Zugriffe auf Syscalls mit Hifle von eBFP
+Es gibt erste Bestrebungen Seccomp zur weiteren Absicherung von Containern einzusetzen.
+
+* Cgroups: https://en.wikipedia.org/wiki/Cgroups
+
+* Seccomp: https://en.wikipedia.org/wiki/Seccomp
+
+* Seccomp für OCI Containern: https://www.redhat.com/sysadmin/container-security-seccomp
+
+=== MAC / SElinux vs AppAmor - AuditD
+
+*Seite 734/735*
+
+Siberschatz behandelt MAC in Abgrenzung zu DAC.
+SElinux benutzt Labels.
+Policies erlauben dann den Zugriff von Prozessen auf Files und Resourcen im System.
+
+AuditD logt Zugriffe.
+
+=== Sicherer Betrieb von Containern
+
+Docker verwendet einen Deamon mit Root-Rechten, was als mögliches Angriffsziel gesehen wird.
+Deshalb wurde podman entwickelt um Container auch mit Benutzerrechten als einfachen Prozess starten zu können.
+
+Docker Container bauen braucht ebenfalls erhöhte Rechte.
+Deshalb wurde Buildah entwickelt, welche Container auch ohne Root-Rechte erstellen kann.
+
+OpenShift hat spezielle Vorraussetzungen an Container, welche über die Anforderungen von Kubernetes hinausgehen.
+So müssen diese das Starten unter beliebigen UID und GIU > 1024 erlauben.
+Die meisten Rechte werden dem Container nicht zugestanden.
+Priviligierte Container müssen in dem entsprechenden Namespace erst durch einen Admin erlaubt werden.
+
+Unter RHEL und Fedora wird SElinux eingesetzt um den Container weiter zu beschränken.
+Container bekommen hier nicht nur ein Target, welches den Zugriff zwischen Container erlauben würde, sondern zusetzlich einen Context, der zufällig für jeden Container bestimmt wird.
+
+* Buildah Github: https://github.com/containers/buildah
+
+* Rootless Podman: https://opensource.com/article/19/2/how-does-rootless-podman-work
+
+=== Red Hat CoreOS / Fedora CoreOS / Silverblue
+
+Nachfolger von Projekt Atomic und CoreOS Container Linux.
+Basiert auf OStree statt installierten RPMs und verwaltet Dateien in einem gelayerten Dateisystem, ähnlich zu Git.
+Fast alle Dateisysteme werden nur ReadOnly gemounted.
+Hochgradig spezialisiert auf den Betrieb von Containern.
+Das ganze Betriebssystem ist immutable und Updates laufen ersteinmal auf eine inaktive "Partition"
+Mit dem Neustart kann in die andere Partition gewechselt werden, bei Fehlern ist ein Rollback jederzeit möglich.
+Wird über eine Ignitionfile (ähnlich zu cloud-init) konfiguriert.
+
+Silverblue ist eine Version von Fedora, welche ebenfalls auf OStree basiert, jedoch als Workstation gedacht ist.
+
+https://getfedora.org/coreos
+
+== Übungen
+
+Übung für SElinux
+
+* Audit2allow Policy erstellen
+
+
+* Ansible Playbook schreiben
+
+* OCI Container erstellen

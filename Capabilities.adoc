@@ -1,0 +1,78 @@
+= Themenbloecke
+
+Übersicht der Themen und Inhalte der einzelnen Blöcke.
+
+== Prerequisites
+
+Diese Dinge sollten die Stundenten bereits kennen:
+
+* In Linux, everything is a file
+* XXX
+
+== Block SeLinux
+
+Siehe file:///SELinux.adoc
+
+== Block Caps & Seccomp
+
+Wie schränkt der Kernel Berechtigungen ein?
+
+=== Capabilities
+
+https://man7.org/linux/man-pages/man7/capabilities.7.html
+
+* Klassisch Unpriviligiert vs Priviligiert / User vs Root
+* Arten von Capabilities
+* Einige wichtige Beispiele
+* Beschränkung 64bit deshalb Gruppierung
+
+=== Seccomp
+
+https://www.kernel.org/doc/Documentation/prctl/seccomp_filter.txt
+
+* Syscalls sind zu grob in Caps eingeteilt
+* Weitere Unterteilung dank BPF
+
+== Block Cgroups & Namespaces
+
+Wo passiert die Isolierung?
+
+=== Cgroups
+
+https://en.wikipedia.org/wiki/Cgroups
+
+* Resource limits
+* Prios
+* Accounting
+* Control
+* cgroups vs cgroups-v2
+
+
+=== Linux Namespace
+
+https://en.wikipedia.org/wiki/Linux_namespaces
+
+* Mount
+* Network
+* PID
+* Users
+* ...
+
+== Virtualisierung
+
+__Am Silberschatz orientieren__
+
+* Virtualisierung der HW
+* Full, Para, etc.
+
+== Containerisierung
+
+* Statt VM alles in Namespaces
+
+== Automatisierung
+
+__Grundthema Evolution__
+
+* Schriftlich / Manuell
+* Shell Scripte / Perl / Python
+* Puppet / Ansible / Terraform
