@@ -1,17 +1,32 @@
-= Themenbloecke
+= Themenblöcke
 
 Übersicht der Themen und Inhalte der einzelnen Blöcke.
 
-== Prerequisites
+== Vorkenntnisse
 
 Diese Dinge sollten die Stundenten bereits kennen:
 
 * In Linux, everything is a file
-* XXX
+* Kernel Rings
+* Prozesse, Threads, Forks
+* Basic Bash Programmierung
+** Pipes
+** Environment Variables
+** grep, sed, awk
+* DAC am Beispiel Dateizugriffsrechte
+* Systemd
+* man / info System
 
 == Block SeLinux
 
+MAC in Linux
+
 Siehe file:///SELinux.adoc
+
+.Übungen:
+* Berechtigungen für httpd finden
+* boolean für httpd zugriff auf NFS einschalten
+* audit2allow nutzen um eine Neue Regel zu erzeugen
 
 == Block Caps & Seccomp
 
@@ -37,20 +52,11 @@ https://www.kernel.org/doc/Documentation/prctl/seccomp_filter.txt
 
 Wo passiert die Isolierung?
 
-=== Cgroups
-
-https://en.wikipedia.org/wiki/Cgroups
-
-* Resource limits
-* Prios
-* Accounting
-* Control
-* cgroups vs cgroups-v2
-
-
 === Linux Namespace
 
 https://en.wikipedia.org/wiki/Linux_namespaces
+
+Alles kann seinen eigenen Namespace bekommen.
 
 * Mount
 * Network
@@ -58,21 +64,77 @@ https://en.wikipedia.org/wiki/Linux_namespaces
 * Users
 * ...
 
+=== Cgroups
+
+https://en.wikipedia.org/wiki/Cgroups
+
+Limits für Prozessgruppen
+
+* Resource limits
+* Prios
+* Accounting
+* Control
+* cgroups vs cgroups-v2
+
 == Virtualisierung
 
 __Am Silberschatz orientieren__
 
+Mehrere Systeme auf einem Rechner
+
+* Ermöglicht verschiedene OS auf einem Rechner
 * Virtualisierung der HW
 * Full, Para, etc.
+* SRIOV
+* kurze Historie in LPARs und Zen
+* Lösung für Dependancy Hell
+* Vagrant
 
 == Containerisierung
 
+Wie kommt das alles zusammen?
+
 * Statt VM alles in Namespaces
+--> Leichtgewichtiger
+--> Höhere Packungsdichte
+* Rootless Containers (Podman)
+* Sicherer Betrieb:
+** Beliebiger Benutzer, selbst Root mappt auf eine beliebige UID
+** Eigene Namespaces
+** Alle Capabilities abwerfen
+* Demonless Build (Buildah)
+* bessere Automatisierung
+* Historie Cloud Foundry / OpenShift 2
+** Container haben nur das Binary und nutzen Runtime des Host
+** Vorgänger LPARs, Jails
+* Abgrenzung LXC
+* Lösung für Dependancy Hell
+* Docker Hub, Quay & Co
+
+== Kubernetes
+* Trend Kubernetes und OpenShift
 
 == Automatisierung
 
 __Grundthema Evolution__
 
 * Schriftlich / Manuell
+** "tausend Seiten Word Dokument"
 * Shell Scripte / Perl / Python
 * Puppet / Ansible / Terraform
+* Infrastructure as Code
+--> DevOps
+--> Wiederholbarkeit
+--> Ermöglicht Pets vs. Cattles
+* Ansible Galaxy & Co
+
+.Übungen:
+* Ansible Playbook schreiben
+
+== Patchmanagement
+
+* Dateien zusammenkopieren --> Tar --> RPM / Dep & Co
+* Dependency Hell
+* Pip / CPAN / Co
+* Repositories
+* Modules
