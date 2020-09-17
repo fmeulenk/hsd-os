@@ -12,7 +12,7 @@ Diese Dinge sollten die Stundenten bereits kennen:
 * Basic Bash Programmierung
 ** Pipes
 ** Environment Variables
-** grep, sed, awk
+** grep, sed, awk, jq
 * DAC am Beispiel Dateizugriffsrechte
 * Systemd
 * man / info System
@@ -36,6 +36,7 @@ Wie schränkt der Kernel Berechtigungen ein?
 
 https://man7.org/linux/man-pages/man7/capabilities.7.html
 
+* Einteilung von Syscalls in Gruppen
 * Klassisch Unpriviligiert vs Priviligiert / User vs Root
 * Arten von Capabilities
 * Einige wichtige Beispiele
@@ -108,11 +109,17 @@ Wie kommt das alles zusammen?
 ** Container haben nur das Binary und nutzen Runtime des Host
 ** Vorgänger LPARs, Jails
 * Abgrenzung LXC
-* Lösung für Dependancy Hell
+* Lösung für Dependancy Hell --> Update Hell
 * Docker Hub, Quay & Co
 
 == Kubernetes
+
+Das neue Betriebssystem der Cloud
+
 * Trend Kubernetes und OpenShift
+* bekommt mit Istio / LinkerD mehr Netzwerkmöglichkeiten
+* KubeVirt / OpenShift Virtualization bringt Virtualisierung
+--> Neue Art von Infrastructure as Code
 
 == Automatisierung
 
@@ -135,6 +142,6 @@ __Grundthema Evolution__
 
 * Dateien zusammenkopieren --> Tar --> RPM / Dep & Co
 * Dependency Hell
-* Pip / CPAN / Co
+* CPAN, PyPI, Gems & Co
 * Repositories
 * Modules
