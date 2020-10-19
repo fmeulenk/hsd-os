@@ -35,7 +35,7 @@ Felix Meulenkamp <lix@redhat.com>
 
 **System Calls**
 
-System Calls oder kürzer, Syscalls, stellen die Schnittstelle für Programm auf Funktionen des Kernels dar
+System Calls oder kürzer, Syscalls, stellen die Schnittstelle für Programme auf Funktionen des Kernels dar
 
 Damit man nicht alles ständig neu entwickeln muss nutzen Programme verschiedene Bibliotheken, sogenannte Libraries, kurz Libs, wie zB die `glibc`, die zentrale C Lib von GNU/Linux, in der verschiedene Funktionen schon fertig enthalten sind.
 
@@ -51,26 +51,70 @@ Es gibt Syscalls für alle möglichen Funktionen... Prozesse erzeugen und beende
 
 Verschieden Subsysteme, wie das Filesystem oder das Netzwerk werden so abstrahiert und als System Call Interfaces bezeichnet.
 
+
 **Capabilities**
 
-Da System calls tief in das System greifen, wurde früh nach einer Möglichkeit gesucht den Zugriff auf diese zu beschränken.
+Da Syscalls tief in das System greifen, wurde früh nach einer Möglichkeit gesucht den Zugriff auf diese zu beschränken.
 
-* Aufteilung Priviligiert vs Unpriviligiert
-* weitere Aufteilung in Caps
+Deshalb wurden früh zwischen unpriviligierten und priviligierten Usern unterschieden.
 
-Hierzu wurden die Capabilities eingeführt.
+Zunächst recht einfach, alles was mit effektiver UID 0 läuft ist Priviligiert und ignoriert damit alle sicherheitchecks im Kernel.
 
-System Calls sind 
+Alle anderen Nutzer waren somit von vielen Funktionen ausgesperrt.
 
-* Caps bündeln nach Themen
+Das Konzept wurde schliesslich um Gruppen erweitert und somit war es plötzlich auch möglich über Gruppenmitgliedschaften einige Rechte zu erlangen.
+
+Damit nun einige harmlose Programme auf priviligierte Aktionen durchführen können wurden Konstrukte wie das SUID-Bit eingeführt.
+
+Ein Programm mit einem solchen Bit gesetzt, läuft nicht unter dem Benutzer der es startet, sondern dem Benutzer dem es gehört.
+
+Damit wird es Möglich zum Beispiel den `ping` -Befehl auch als normaler Benutzer zu nutzen, obwohl er einige Sonderrechte für das Netzwerk benötigt.
+
+Dieses Konzept war jedoch immer noch leicht angreifbar, da eine Schwachstelle in einem solchen Programm nun ggfs. zu vollen Root-Rechten führte.
+
+In meinen frühen Jahren als System Administrator, hatte ich zB. einen Kollegen der eine ungepatchte Version des Tools `finger` regelmäßig dazu nutzte um einen Kundenserver mit wechselnden Root Passwörtern zu betreuen ohne sich jedes Mal das Passwort neu beschaffen zu müssen.
+
+Diese extrem grobe Aufteilung reichte somit nicht aus und die Rechte wurden in Capabilities aufgeteilt.
+
+Caps sind seit Linux 2.2 und somit seit etwa 1999 im Linux Kernel enthalten.
+
+Eine Bit-Maske regelt welche Caps für ein Program erlaut sind und welche nicht.
+
+Es wurden 64Bit hierfür vorgesehen, welche jedoch schnell knapp wurden.
+
+Dies führte dazu, das die einzelnen Caps zu Gruppen wurden, die bestimmt Funktionalitäten bündeln.
+
+XXX File Cap hier einbauen
+
 * abgabe bestimmter Caps, wenn nicht mehr benötigt
-* Beispiel Apache braucht erhöhte Rechte und die Cap `CAP_NET_BIND_SERVICE` um Port 80 zu binden und gibt danach cap ab und wird zu User `Nobody`
+
+Zum Beispiel Apache braucht erhöhte Rechte und die Cap `CAP_NET_BIND_SERVICE` um Port 80 zu binden und gibt danach cap ab und wird zu User `Nobody`
+
 * Vorteil Container: Nicht die Anwendung sondern die Container Run-time gibt die Caps ab
 * Teil der Metadaten eines Containers in Kubernetes
 * Arten von Capabilities
 * Einige wichtige Beispiele
-* Beschränkung 64bit deshalb Gruppierung
+* File Caps
 * xAttr `security.capability`
+
+Beispiel:
+
+[source:console]
+----
+[root@localhost ~]# yum install attr
+[root@localhost ~]# getfattr -d -m security.capability /usr/bin/*
+getfattr: Removing leading '/' from absolute path names
+# file: usr/bin/newgidmap
+security.capability=0sAQAAAkAAAAAAAAAAAAAAAAAAAAA=
+
+# file: usr/bin/newuidmap
+security.capability=0sAQAAAoAAAAAAAAAAAAAAAAAAAAA=
+
+# file: usr/bin/ping
+security.capability=0sAAAAAgAwAAAAAAAAAAAAAAAAAAA=
+
+----
+
 
 **Seccomp**
 
