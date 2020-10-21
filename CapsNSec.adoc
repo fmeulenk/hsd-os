@@ -6,7 +6,9 @@ Felix Meulenkamp <lix@redhat.com>
 .Links
 * https://en.wikipedia.org/wiki/System_call
 * https://man7.org/linux/man-pages/man7/capabilities.7.html
+* https://www.kernel.org/doc/html/latest/security/credentials.html Ebenfalls Caps
 * https://www.kernel.org/doc/Documentation/prctl/seccomp_filter.txt
+* https://www.kernel.org/doc/html/latest/userspace-api/seccomp_filter.html
 * https://en.wikipedia.org/wiki/Linux_kernel_interfaces
 * https://en.wikipedia.org/wiki/Capability-based_security#POSIX_capabilities
 
@@ -64,7 +66,32 @@ Alle anderen Nutzer waren somit von vielen Funktionen ausgesperrt.
 
 Das Konzept wurde schliesslich um Gruppen erweitert und somit war es plötzlich auch möglich über Gruppenmitgliedschaften einige Rechte zu erlangen.
 
-Damit nun einige harmlose Programme auf priviligierte Aktionen durchführen können wurden Konstrukte wie das SUID-Bit eingeführt.
+Damit nun einige harmlose Programme auf priviligierte Aktionen durchführen können wurden Konstrukte wie das SUID- oder SGID-Bits, auch UNIX exec privilege escalation bits, eingeführt.
+
+Beispiel:
+[source,console]
+----
+# Find SUID-Bit
+$ sudo find /usr/bin /usr/lib -perm /4000 -user root
+/usr/bin/chage
+/usr/bin/newgrp
+/usr/bin/pkexec
+/usr/bin/gpasswd
+/usr/bin/su
+/usr/bin/vmware-user-suid-wrapper
+/usr/bin/sudo
+/usr/bin/umount
+/usr/bin/passwd
+/usr/bin/mount
+/usr/bin/fusermount
+/usr/bin/fusermount3
+/usr/lib/polkit-1/polkit-agent-helper-1
+
+# Find SGID-Bit
+$ sudo find /usr/bin /usr/lib -perm /2000 -user root
+/usr/bin/write
+/usr/bin/locate
+----
 
 Ein Programm mit einem solchen Bit gesetzt, läuft nicht unter dem Benutzer der es startet, sondern dem Benutzer dem es gehört.
 
@@ -72,7 +99,7 @@ Damit wird es Möglich zum Beispiel den `ping` -Befehl auch als normaler Benutze
 
 Dieses Konzept war jedoch immer noch leicht angreifbar, da eine Schwachstelle in einem solchen Programm nun ggfs. zu vollen Root-Rechten führte.
 
-In meinen frühen Jahren als System Administrator, hatte ich zB. einen Kollegen der eine ungepatchte Version des Tools `finger` regelmäßig dazu nutzte um einen Kundenserver mit wechselnden Root Passwörtern zu betreuen ohne sich jedes Mal das Passwort neu beschaffen zu müssen.
+In meinen frühen Jahren als Unix System Betreuer, hatte ich zB. einen Kollegen der eine ungepatchte Version des Tools `finger` regelmäßig dazu nutzte um einen Kundenserver mit wechselnden Root Passwörtern zu betreuen ohne sich jedes Mal das Passwort neu beschaffen zu müssen.
 
 Diese extrem grobe Aufteilung reichte somit nicht aus und die Rechte wurden in Capabilities aufgeteilt.
 
@@ -95,15 +122,28 @@ Zum Beispiel Apache braucht erhöhte Rechte und die Cap `CAP_NET_BIND_SERVICE` u
 * Arten von Capabilities
 * Einige wichtige Beispiele
 * File Caps
+*  POSIX.1e Standart
+* Linux Security Module
 * xAttr `security.capability`
 
 Beispiel:
 
 [source:console]
 ----
-[root@localhost ~]# yum install attr
-[root@localhost ~]# getfattr -d -m security.capability /usr/bin/*
+$ sudo getfattr -d -m security.capability /usr/bin/*
 getfattr: Removing leading '/' from absolute path names
+# file: usr/bin/arping
+security.capability=0sAAAAAgAgAAAAAAAAAAAAAAAAAAA=
+
+# file: usr/bin/clockdiff
+security.capability=0sAAAAAgAgAAAAAAAAAAAAAAAAAAA=
+
+# file: usr/bin/gnome-keyring-daemon
+security.capability=0sAQAAAgBAAAAAAAAAAAAAAAAAAAA=
+
+# file: usr/bin/gnome-shell
+security.capability=0sAQAAAgAAgAAAAAAAAAAAAAAAAAA=
+
 # file: usr/bin/newgidmap
 security.capability=0sAQAAAkAAAAAAAAAAAAAAAAAAAAA=
 
@@ -112,7 +152,6 @@ security.capability=0sAQAAAoAAAAAAAAAAAAAAAAAAAAA=
 
 # file: usr/bin/ping
 security.capability=0sAAAAAgAwAAAAAAAAAAAAAAAAAAA=
-
 ----
 
 
@@ -122,3 +161,4 @@ Grenze zwischen Kernel und User-Mode
 
 * Syscalls sind zu grob in Caps eingeteilt
 * Weitere Unterteilung dank BPF
+*
