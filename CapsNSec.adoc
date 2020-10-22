@@ -68,38 +68,34 @@ Das Konzept wurde schliesslich um Gruppen erweitert und somit war es plötzlich 
 
 Damit nun einige harmlose Programme auf priviligierte Aktionen durchführen können wurden Konstrukte wie das SUID- oder SGID-Bits, auch UNIX exec privilege escalation bits, eingeführt.
 
-Beispiel:
-[source,console]
-----
-# Find SUID-Bit
-$ sudo find /usr/bin /usr/lib -perm /4000 -user root
-/usr/bin/chage
-/usr/bin/newgrp
-/usr/bin/pkexec
-/usr/bin/gpasswd
-/usr/bin/su
-/usr/bin/vmware-user-suid-wrapper
-/usr/bin/sudo
-/usr/bin/umount
-/usr/bin/passwd
-/usr/bin/mount
-/usr/bin/fusermount
-/usr/bin/fusermount3
-/usr/lib/polkit-1/polkit-agent-helper-1
-
-# Find SGID-Bit
-$ sudo find /usr/bin /usr/lib -perm /2000 -user root
-/usr/bin/write
-/usr/bin/locate
-----
-
 Ein Programm mit einem solchen Bit gesetzt, läuft nicht unter dem Benutzer der es startet, sondern dem Benutzer dem es gehört.
 
-Damit wird es Möglich zum Beispiel den `ping` -Befehl auch als normaler Benutzer zu nutzen, obwohl er einige Sonderrechte für das Netzwerk benötigt.
+Damit wird es Möglich zum Beispiel den `sudo` -Befehl auch als normaler Benutzer zu nutzen, obwohl er einige Sonderrechte für das Netzwerk benötigt.
+
+.Eine schnelle Suche zeigt uns, welche Dateien diese Sonderrechte gesetzt haben.
+[source,console]
+----
+[root@f45cd3caec65 ~]# find /usr/bin /usr/lib -perm /4000 -user root
+/usr/bin/chage
+/usr/bin/gpasswd
+/usr/bin/newgrp
+/usr/bin/mount
+/usr/bin/su
+/usr/bin/umount
+/usr/bin/sudo
+/usr/bin/pkexec
+/usr/bin/passwd
+/usr/bin/crontab
+/usr/lib/polkit-1/polkit-agent-helper-1
+
+[root@f45cd3caec65 ~]# find /usr/bin /usr/lib -perm /2000 -user root
+/usr/bin/write
+[root@f45cd3caec65 ~]#
+----
 
 Dieses Konzept war jedoch immer noch leicht angreifbar, da eine Schwachstelle in einem solchen Programm nun ggfs. zu vollen Root-Rechten führte.
 
-In meinen frühen Jahren als Unix System Betreuer, hatte ich zB. einen Kollegen der eine ungepatchte Version des Tools `finger` regelmäßig dazu nutzte um einen Kundenserver mit wechselnden Root Passwörtern zu betreuen ohne sich jedes Mal das Passwort neu beschaffen zu müssen.
+//In meinen frühen Jahren als Unix System Betreuer, hatte ich zum . einen Kollegen der eine ungepatchte Version des Tools `finger` regelmäßig dazu nutzte um einen Kundenserver mit wechselnden Root Passwörtern zu betreuen ohne sich jedes Mal das Passwort neu beschaffen zu müssen.
 
 Diese extrem grobe Aufteilung reichte somit nicht aus und die Rechte wurden in Capabilities aufgeteilt.
 
@@ -111,14 +107,18 @@ Es wurden 64Bit hierfür vorgesehen, welche jedoch schnell knapp wurden.
 
 Dies führte dazu, das die einzelnen Caps zu Gruppen wurden, die bestimmt Funktionalitäten bündeln.
 
-XXX File Cap hier einbauen
+Dazu gehört eine weitere Bitmaske, die regelt, ob eine Cap vererbt werden kann.
 
-* abgabe bestimmter Caps, wenn nicht mehr benötigt
+Aber Cap können nicht nur Angefordert, sondern auch abgegeben werden, wenn sie nicht mehr benötigt werden.
 
-Zum Beispiel Apache braucht erhöhte Rechte und die Cap `CAP_NET_BIND_SERVICE` um Port 80 zu binden und gibt danach cap ab und wird zu User `Nobody`
+Das macht es zu einem wichtigen security feature.
 
-* Vorteil Container: Nicht die Anwendung sondern die Container Run-time gibt die Caps ab
-* Teil der Metadaten eines Containers in Kubernetes
+Zum Beispiel Apache braucht erhöhte Rechte und die Cap `CAP_NET_BIND_SERVICE` um Port 80 zu binden und gibt danach die nicht weiter benötigten caps wieder ab.
+
+Wird dieser Prozess nun angegriffen, gibt es nur ein kleines Zeitfenster in dem root-Rechte erlangt werden können.
+
+Und noch besser, statt wie früher voll priviligiert zu sein, hat der Prozess nur noch Sonderrechte um bestimmte Netzwerkeinstellungen zu ändern.
+
 * Arten von Capabilities
 * Einige wichtige Beispiele
 * File Caps
@@ -130,20 +130,44 @@ Beispiel:
 
 [source:console]
 ----
-$ sudo getfattr -d -m security.capability /usr/bin/*
+[root@f45cd3caec65 ~]# yum install -y attr
+Updating Subscription Management repositories.
+Last metadata expiration check: 0:01:21 ago on Thu 22 Oct 2020 07:33:39 PM EDT.
+Dependencies resolved.
+==========================================================================================================================================
+ Package                 Architecture              Version                         Repository                                        Size
+==========================================================================================================================================
+Installing:
+ attr                    x86_64                    2.4.48-3.el8                    rhel-8-for-x86_64-baseos-rpms                     68 k
+
+Transaction Summary
+==========================================================================================================================================
+Install  1 Package
+
+Total download size: 68 k
+Installed size: 168 k
+Downloading Packages:
+attr-2.4.48-3.el8.x86_64.rpm                                                                              267 kB/s |  68 kB     00:00
+------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                     265 kB/s |  68 kB     00:00
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                  1/1
+  Installing       : attr-2.4.48-3.el8.x86_64                                                                                         1/1
+  Running scriptlet: attr-2.4.48-3.el8.x86_64                                                                                         1/1
+  Verifying        : attr-2.4.48-3.el8.x86_64                                                                                         1/1
+Installed products updated.
+
+Installed:
+  attr-2.4.48-3.el8.x86_64
+
+Complete!
+
+[root@f45cd3caec65 ~]# getfattr -d -m security.capability /usr/bin/*
 getfattr: Removing leading '/' from absolute path names
-# file: usr/bin/arping
-security.capability=0sAAAAAgAgAAAAAAAAAAAAAAAAAAA=
-
-# file: usr/bin/clockdiff
-security.capability=0sAAAAAgAgAAAAAAAAAAAAAAAAAAA=
-
-# file: usr/bin/gnome-keyring-daemon
-security.capability=0sAQAAAgBAAAAAAAAAAAAAAAAAAAA=
-
-# file: usr/bin/gnome-shell
-security.capability=0sAQAAAgAAgAAAAAAAAAAAAAAAAAA=
-
 # file: usr/bin/newgidmap
 security.capability=0sAQAAAkAAAAAAAAAAAAAAAAAAAAA=
 
