@@ -32,6 +32,9 @@ Siehe file:///SELinux.adoc
 
 Wie schränkt der Kernel Berechtigungen ein?
 
+Siehe file:///CapsNSec.adoc
+
+
 === Capabilities
 
 https://man7.org/linux/man-pages/man7/capabilities.7.html

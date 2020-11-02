@@ -147,12 +147,12 @@ Schauen wir uns hierfür ein Beispiel auf unserer Laborumgebung an.
 
 Zunächst muss in dieser minimalistischen Umgebung noch das Paket `attr` nachinstalliert werden.
 
-Dies enthält das Programm `getfattr`, welches xAttribute anzeigen kann.
+Dies enthält das Programm `getfattr`, welches xAttribute direkt anzeigen kann.
 
-Das Programm `getcap` ist schon vorinstalliert.
+Das Programm `getcap` ist schon vorinstalliert, welches uns die Caps auch lessbar darstellt.
 
 .xAttr Beispiel für Capabilities
-[source:console]
+[source,console]
 ----
 [root@f45cd3caec65 ~]# yum install -y attr
 Updating Subscription Management repositories.
