@@ -1,0 +1,123 @@
+= Security-Enhanced Linux
+Felix Meulenkamp <lix@redhat.com>
+// Metadata:
+:description: Eine Übersicht über SElinux
+:keywords: selinux, syscalls, lsm
+:license: Creative Commons Attribution-ShareAlike 4.0 International
+// Settings:
+:lang: de
+:idprefix: id_
+:source-highlighter: highlightjs
+// Refs:
+:url-project: https://github.com/fmeulenk/hsd-os
+
+[%notitle]
+== Einleitung
+
+* Warum kann mein Programm diese Datei nicht lesen? +
+  Ich habe doch alle Zugriffsrechte!
+
+* Was ist dieses SELinux? +
+  Und wie kann es meine Programme sicherer machen?
+
+* Und warum sollte man Dan Walsh nicht zu weinen bringen?
+
+== Mandantory Access Control System
+
+// Leer
+
+=== Mandantory Access Control System
+
+* SELinux ist ein Mandantory Access Control System, kurz MAC
+* Im MAC steuert ein Security Admin zentral die Zufgriffsrechte
+* Unterschied: Discretionary AC (DAC), dort steuert der Besitzer
+
+
+=== Beispiele MAC
+
+* SELinux
+* AppAmore
+* Windows System Mandatory Integrity Control (MIC)
+* CPU-Rings
+
+=== Beispiele DAC
+
+* Berechtigungen des Dateisystem... RWX
+* Access Control Lists (ACL) im Dateisystem
+
+=== SELinux
+
+* SELinux definiert Regeln unter denen ein Zugriff zwischen Programmen und anderen Resourcen erlaubt sind
+* zB. Auf welche Pfade darf ein Prozess zugreiffen?
+* Welchen Ports darf er lauschen?
+* Auf welche Sockets schreiben?
+
+=== Resourcen
+
+// Links & Silberschatz
+.Links
+* MAC: https://en.wikipedia.org/wiki/Mandatory_access_control
+* DAC: https://en.wikipedia.org/wiki/Discretionary_access_control
+
+.Silberschatz
+* XXX MAC
+
+== Motivation
+
+// Leer
+
+=== Welches Problem löst SELinux?
+
+* SELinux separiert die Zuständigkeiten +
+Separation of concerns
+
+* Ein Security Admin kümmert sich zentral um die Berechtigungen
+* Programme müssen hierfür nicht verändert werden
+* Oftmals definieren Entwickler hierbei die Berechtigungen, welche sie später benötigen
+* Der Security Admin kann dies jedoch überschreiben
+
+
+
+=== Resourcen
+
+// Links & Silberschatz
+.Links
+* https://en.wikipedia.org/wiki/Separation_of_concerns
+
+.Silberschatz
+* XXX
+
+== Linux Security Module Framework
+
+=== LSM
+
+* Linux Security Module Framework, kurz LSM
+* Modulares System zur Überprüfung von Zugriffen auf den Kernel
+* Verschiedene Module werden der Reihe nach überprüft
+
+=== LSM Module
+
+* Capabilities (immer erstes Modul)
+* Seccomp
+* SElinux
+* AppaAmore
+
+== Weitere Informationen
+
+Laborumgebung für SELinux unter +
+https://lab.redhat.com/selinux-containers
+
+Für `getfattr` zunächst das Paket `attr` installieren.
+
+[source,console]
+----
+# yum install -y attr
+----
+
+== Fragen
+
+* Gibt es weitere Fragen?
+
+== Danke
+
+Vielen Dank für die Aufmerksamkeit!

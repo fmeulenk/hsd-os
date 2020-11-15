@@ -15,6 +15,18 @@ Dateien mit dem suffix `_slides.adoc` sind Präsentationen mit `reveal.js`.
 
 == Vorbereitungen für die Verarbeitung von Asciidoc
 
+Es ist sehr empfehlenswert alle Tools in einer extra _Toolbox_ zu installieren.
+So beeinflussen die Abhängigkeiten das eigentlich System.
+Damit können auch ohne Root-Rechte Programme nachinstalliert werden.
+Siehe https://github.com/containers/toolbox .
+
+[source,console]
+----
+[user@system hsd-os]$ toolbox create -r f33 -c hsd
+[user@system hsd-os]$ toolbox enter hsd
+⬢[user@toolbox hsd-os]$
+----
+
 Bundler installieren, falls nicht schon vorhanden.
 Dieser sorgt dafür, dass Ruby Gems nur lokal für dieses Projekt installiert werden.
 
@@ -22,20 +34,26 @@ Hierfür muss _Ruby_ und _Ruby-Gems_ installiert sein.
 
 [source,console]
 ----
-$ gem install bundler
-$ bundle config --local github.https true
+⬢[user@toolbox hsd-os]$ sudo dnf install -y rubygems
+⬢[user@toolbox hsd-os]$ gem install bundler
+⬢[user@toolbox hsd-os]$ bundle config --local github.https true
 ----
 
 Die benötigten Gems sind in `Gemfile` aufgeführt und können mit dem Gem bundler installiert werden.
 
 [source,console]
 ----
-$ bundle --path=.bundle/gems --binstubs=.bundle/.bin
+⬢[user@toolbox hsd-os]$ bundle --path=.bundle/gems --binstubs=.bundle/.bin
 ----
 
 == Rendern von Asciidoc in PDF
 
 Siehe https://asciidoctor.org/docs/asciidoctor-pdf/
+
+[source,console]
+----
+⬢[user@toolbox hsd-os]$ bundle exec asciidoctor-pdf  *.adoc
+----
 
 == Rendern von Acciidoc+Reveal.js in HTML Slides
 
@@ -43,7 +61,7 @@ Siehe https://asciidoctor.org/docs/asciidoctor-revealjs/
 
 [source,console]
 ----
-bundle exec asciidoctor-revealjs \
+⬢[user@toolbox hsd-os]$ bundle exec asciidoctor-revealjs \
   -a revealjsdir=https://cdn.jsdelivr.net/npm/reveal.js@3.9.2 \
   *_slides.adoc
 ----
