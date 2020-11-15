@@ -1,0 +1,49 @@
+= Readme
+Felix Meulenkamp <fmeulenk@redhat.com>
+:lang: de
+:source-highlighter: rouge
+
+{toc}
+
+== Über dieses Repository
+Dieses Repository enthält die Materialien für Teile der Vorlesung Betriebssysteme WS2020/2021 an der Hochschule Düsseldorf (HSD).
+
+Es steht unter der http://creativecommons.org/licenses/by-sa/4.0/[Creative Commons Attribution-ShareAlike 4.0 International License] image:https://i.creativecommons.org/l/by-sa/4.0/80x15.png[]
+
+Dokumente mit dem Suffix `.adoc` sind in https://asciidoctor.org/[Asciidoc] geschrieben.
+Dateien mit dem suffix `_slides.adoc` sind Präsentationen mit `reveal.js`.
+
+== Vorbereitungen für die Verarbeitung von Asciidoc
+
+Bundler installieren, falls nicht schon vorhanden.
+Dieser sorgt dafür, dass Ruby Gems nur lokal für dieses Projekt installiert werden.
+
+Hierfür muss _Ruby_ und _Ruby-Gems_ installiert sein.
+
+[source,console]
+----
+$ gem install bundler
+$ bundle config --local github.https true
+----
+
+Die benötigten Gems sind in `Gemfile` aufgeführt und können mit dem Gem bundler installiert werden.
+
+[source,console]
+----
+$ bundle --path=.bundle/gems --binstubs=.bundle/.bin
+----
+
+== Rendern von Asciidoc in PDF
+
+Siehe https://asciidoctor.org/docs/asciidoctor-pdf/
+
+== Rendern von Acciidoc+Reveal.js in HTML Slides
+
+Siehe https://asciidoctor.org/docs/asciidoctor-revealjs/
+
+[source,console]
+----
+bundle exec asciidoctor-revealjs \
+  -a revealjsdir=https://cdn.jsdelivr.net/npm/reveal.js@3.9.2 \
+  *_slides.adoc
+----

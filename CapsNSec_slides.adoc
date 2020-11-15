@@ -1,0 +1,224 @@
+= Capabilities and Seccomp
+Felix Meulenkamp <lix@redhat.com>
+// Metadata:
+:description: Eine Übersicht über Capabilities und Seccomp
+:keywords: capabilities, seccomp, syscalls
+:license: Creative Commons Attribution-ShareAlike 4.0 International
+// Settings:
+:lang: de
+:idprefix: id_
+:source-highlighter: highlightjs
+// Refs:
+:url-project: https://github.com/fmeulenk/hsd-os
+
+== !
+
+* Kein *root*, darfst du nichts?
+* Wie entscheidet der Kernel, was eine Anwendung darf?
+* Gibt es mehr als _UID: 0_ / _GID: 0_?
+
+== System Calls
+
+=== Syscalls
+
+* System Calls, kurz Syscalls
+* Schnittstelle Der Anwendungen auf Funktionen des Kernels
+* Abstrahieren Subsysteme des Kernels
+** zB. das Filesystem oder Netzwerkverbindung
+* Schaffen eine gewisse Unabhängigkeit von der genauen Rechnerarchitectur
+
+=== Privilegierte Syscalls
+
+* Syscalls greifen tief ins System ein und können potentiell Schaden anrichten
+* Früh: Aufteilung nach _Privilegierten_ und _Unprivilegierten_
+* Nur _Root_ darf _Privilegierte_ Syscalls aufrufen
+* Andere Benutzer sind unprivilegiert.
+
+=== Unix exec escalation bits
+
+* Unter bestimmten Umständen brauchen gewöhnliche User trotdem erhöte Rechte
+* Einführung der Unix execution escalation bits
+* Ist _SETUID_ gesetzt, läuft das Programm mit dem Rechten des Besitzers
+* Ist _SETGID_ gesetz, ... mit den der besitzenden Gruppe
+* Ohne, ... mit den Rechten des ausführenden Benutzers
+
+
+=== Beispiele für SETUID und SETGID
+
+* `sudo` braucht _Root_-Rechte um in beliebige Nutzer wechseln zu können.
+* `passwd` und `gpasswd` schreiben auf die zentralen Paswortdatein
+* `write` braucht Gruppenrechte um auf ein beliebiges Terminal schreiben zu dürfen.
+
+=== Suche nach SETUID Dateien
+
+Mit `find` kann gezielt nach Datein mit bestimmten Berechtigungen gesucht werden.
+Die Option `-perm /4000` sucht nach _SETUID_.
+
+[source,console]
+----
+[root@f45cd3caec65 ~]# find /usr/bin /usr/lib \
+    -perm /4000 -user root
+/usr/bin/chage
+/usr/bin/gpasswd
+/usr/bin/newgrp
+/usr/bin/mount
+/usr/bin/su
+/usr/bin/umount
+/usr/bin/sudo
+/usr/bin/pkexec
+/usr/bin/passwd
+/usr/bin/crontab
+/usr/lib/polkit-1/polkit-agent-helper-1
+----
+
+=== Suche nach SETGID Dateien
+
+Mit `find` kann gezielt nach Datein mit bestimmten Berechtigungen gesucht werden.
+Die Option `-perm /2000` sucht nach _SETGID_.
+
+[source,console]
+----
+[root@f45cd3caec65 ~]# find /usr/bin /usr/lib \
+    -perm /2000 -user root
+/usr/bin/write
+----
+
+=== Priviledge Escalation
+
+* Hat ein _SETUID_-Programm mit User: root eine Schwachstelle, so können über diese direkt _Root_-Rechte erlangt werden
+* Beispiel _Apache Httpd_: Gehärtete Installationen wechseln deshalb nach dem Start unter `root` in den Benutzer `nobody`
+* Wird das Programm anschließend angegriffen, können nur noch normale Benutzerrechte erlangt werden
+
+=== Resourcen
+
+.Links
+* https://en.wikipedia.org/wiki/System_call
+* https://en.wikipedia.org/wiki/Linux_kernel_interfaces
+
+.Silberschatz
+* syscall 66-78
+
+== Capabilities
+
+=== Aufteilung in Capabilities
+
+* Die Aufteilung der Privilegien in Priv und Nonpriv ist offensichtlich zu grob
+* Zugriffe auf Syscalls werden nun (zusätzlich) durch _Capabilities_ beschränkt
+* 38 Capabilities bündeln Gruppen von Funktionalitäten
+* Abgebildet durch eine 64Bit Maske + eine weitere Maske zur Vererbung in Threads
+
+=== Beispiele für Capabilities
+
+* CAP_SYS_ADMIN
+** Überladene Capability, die weitreichende Rechte einräumt
+* CAP_SETUID
+** Ermöglicht das Wechseln des Users unter dem der Prozess läuft
+* CAP_NET_BIND_SERVICE
+** Erlaubt das Binden von geschützten Ports (Port kleiner 1024)
+
+=== Eigenschaften von Capabilities
+
+* Capabilities eines Programmes werden als x-Attribute im Dateisystem gespeichert
+* Programme können die Vererbung ihrer Capabilities an Subprozesse genau steuern
+** zB seperater Thread für privilegierte Aktionen
+** Datenverarbeitung im unprivilegierten Thread
+* einzelne Capabilities können auch wieder abgegeben werden
+
+=== Beispiel mit getfattr
+
+Das Commando `getfattr` zeigt uns beliebige x-Attribute von Programmen.
+
+[source,console]
+----
+[root@f45cd3caec65 ~]# getfattr -d \
+    -m security.capability \
+    /usr/bin/*
+getfattr: Removing leading '/' from absolute path names
+# file: usr/bin/newgidmap
+security.capability=0sAQAAAkAAAAAAAAAAAAAAAAAAAAA=
+
+# file: usr/bin/newuidmap
+security.capability=0sAQAAAoAAAAAAAAAAAAAAAAAAAAA=
+
+# file: usr/bin/ping
+security.capability=0sAAAAAgAwAAAAAAAAAAAAAAAAAAA=
+----
+
+=== Beispiel mit getcap
+
+Das Kommando `getcap` zeigt uns gezielt die Capabilities von Programmen.
+
+[source,console]
+----
+[root@f45cd3caec65 ~]# getcap /usr/bin/*
+/usr/bin/newgidmap = cap_setgid+ep
+/usr/bin/newuidmap = cap_setuid+ep
+/usr/bin/ping = cap_net_admin,cap_net_raw+p
+----
+
+`+ep` zeigt hier die Vererbung ist (P)ermitted, (I)nheritable oder (E)ffective
+
+=== Resourcen
+
+.Links
+* https://man7.org/linux/man-pages/man7/capabilities.7.html
+* https://www.kernel.org/doc/html/latest/security/credentials.html
+* https://en.wikipedia.org/wiki/Capability-based_security#POSIX_capabilities
+
+.Silberschatz
+* capabilities 735-737
+* capabilities protection system 735-737
+
+== SECure COMPuting with filters
+
+=== Seccomp
+
+* Capabilities sind immer noch sehr grob
+* SECure COMPuting with filters, kurz Seccomp
+* Filterung auf einzelne Syscalls durch Filterregeln
+* _Berkeley Packet Filters_
+
+=== Resourcen
+
+.Links
+* https://www.kernel.org/doc/html/latest/userspace-api/seccomp_filter.html
+
+
+.Silberschatz
+* syscall filter (SECCOMP-BPF) 738
+* Berkeley Packet Filter (BPF) 102-104
+
+== Linux Security Module Framework
+
+=== LSM
+
+* Linux Security Module Framework, kurz LSM
+* Modulares System zur Überprüfung von Zugriffen auf den Kernel
+* Verschiedene Module werden der Reihe nach überprüft
+
+=== LSM Module
+
+* Capabilities (immer erstes Modul)
+* Seccomp
+* SElinux
+* AppaAmore
+
+== Weitere Informationen
+
+Laborumgebung für SELinux unter +
+https://lab.redhat.com/selinux-containers
+
+Für `getfattr` zunächst das Paket `attr` installieren.
+
+[source,console]
+----
+# yum install -y attr
+----
+
+== Fragen
+
+* Gibt es weitere Fragen?
+
+== Danke
+
+Vielen Dank für die Aufmerksamkeit!
