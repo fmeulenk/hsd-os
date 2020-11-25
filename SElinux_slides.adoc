@@ -45,13 +45,6 @@ Felix Meulenkamp <lix@redhat.com>
 * Berechtigungen des Dateisystem... RWX
 * Access Control Lists (ACL) im Dateisystem
 
-=== SELinux
-
-* SELinux definiert Regeln unter denen ein Zugriff zwischen Programmen und anderen Resourcen erlaubt sind
-* zB. Auf welche Pfade darf ein Prozess zugreiffen?
-* Welchen Ports darf er lauschen?
-* Auf welche Sockets schreiben?
-
 === Resourcen
 
 // Links & Silberschatz
@@ -66,17 +59,21 @@ Felix Meulenkamp <lix@redhat.com>
 
 // Leer
 
-=== Welches Problem löst SELinux?
+=== Welches Problem löst SELinux und AppAmor?
 
 * SELinux separiert die Zuständigkeiten +
-Separation of concerns
+*Separation of concerns*
 
 * Ein Security Admin kümmert sich zentral um die Berechtigungen
 * Programme müssen hierfür nicht verändert werden
 * Oftmals definieren Entwickler hierbei die Berechtigungen, welche sie später benötigen
 * Der Security Admin kann dies jedoch überschreiben
 
+=== Eine Erfolgsstory
 
+* CVE-2019-5736 <https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux>
+* Schwachstelle im "runc" welches von vielen Container Runtimes benutzt wird, bei dem die executable über [/proc/self/exe](file:///proc/self/exe) überschreibbar war
+* SELinux hat dies geblockt
 
 === Resourcen
 
@@ -84,8 +81,80 @@ Separation of concerns
 .Links
 * https://en.wikipedia.org/wiki/Separation_of_concerns
 
-.Silberschatz
-* XXX
+== SELinux
+
+// Leer
+
+=== SELinux
+
+* SELinux definiert Regeln unter denen ein Zugriff zwischen Programmen und anderen Resourcen erlaubt sind
+* zB. Auf welche Pfade darf ein Prozess zugreiffen?
+* Welchen Ports darf er lauschen?
+* Auf welche Sockets schreiben?
+
+=== Context
+
+//XXX
+* Alles bekommt ein Label, Security-Context genannt
+* *user:role:type[:range]*
+* Im Dateisystem als xAttribut gespeichert
+
+=== Policies
+
+* Regeln die Zugriffe zwischen SELinux Contexten regeln
+* Policies: Access Vector Rules
+* ``sesearch -A -s httpd_t -c file -ds ``
+
+=== Booleans
+
+*
+
+=== MLS and MCS
+
+* Normal nur Type Enforcing
+* Multi-Level Security (MLS)  / Multi-Category Security (MCS)
+** Definiert durch den *Range* Teil des Context
+* Ermöglicht feinere Unterteilung
+
+=== SELinux in Virtualization
+
+* Unter KVM bekommt jede VM einen eigenen Context
+* VMs können somit nicht auf Prozesse oder Daten anderer VMs zugreifen
+* Geteilte Dateien haben einen *Type*, der für den Hypervisor (HV) freigegeben ist
+* Die einzelnen HV-Prozesse einer VM haben dann zusätzlich einen eigenen MLS/MCS Range für die Dateien und Resourcen der VM
+
+=== SELinux in Containerization
+
+* Container laufen
+* Deswegen MLS/MCS → Für Container Udica
+
+=== Probleme / Cornercases
+
+* Verhindert kein Buffer-Overflow und Co
+* Verhindert keinen Zugriff auf Resourcen, die erlaubt sind
+* SELinux komplex
+* Apparmor einfacher aber weniger leistungsfähig
+
+
+== AppAmor
+
+// Leer
+
+=== AppArmor
+
+// XXX
+- Ähnlich wie SELinux
+- Nutz auch das LSM
+- Regeln nur über Pfade definiert
+// XXX Beispiel finden
+
+=== Resourcen
+
+// Links & Silberschatz
+.Links
+* https://wiki.ubuntu.com/AppArmor
+//* https://medium.com/information-and-technology/so-what-is-apparmor-64d7ae211ed
+//* https://www.thegeekstuff.com/2014/03/apparmor-ubuntu/
 
 == Linux Security Module Framework
 
