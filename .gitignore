@@ -2,3 +2,5 @@
 .bundle
 *.lock
 *.html
+*.odp
+reveal.js/
