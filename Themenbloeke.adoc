@@ -114,6 +114,7 @@ Wie kommt das alles zusammen?
 * Abgrenzung LXC
 * Lösung für Dependancy Hell --> Update Hell
 * Docker Hub, Quay & Co
+* Toolbox
 
 == Kubernetes
 

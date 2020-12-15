@@ -11,7 +11,8 @@ Felix Meulenkamp <lix@redhat.com>
 // Refs:
 :url-project: https://github.com/fmeulenk/hsd-os
 
-== !
+[%notitle]
+== Einleitung
 
 * Kein *root*, darfst du nichts?
 * Wie entscheidet der Kernel, was eine Anwendung darf?
