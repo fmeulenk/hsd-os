@@ -1,0 +1,15 @@
+= Automatisierung
+Felix Meulenkamp <lix@redhat.com>
+// Metadata:
+:description: Eine Geschichte der Automatisierung
+:keywords: ansible, puppet, bash
+:license: Creative Commons Attribution-ShareAlike 4.0 International
+// Settings:
+:lang: de
+:idprefix: id_
+:source-highlighter: highlightjs
+// Refs:
+:url-project: https://github.com/fmeulenk/hsd-os
+
+[%notitle]
+== Einleitung
