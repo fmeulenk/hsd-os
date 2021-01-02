@@ -2,6 +2,8 @@
 Felix Meulenkamp <fmeulenk@redhat.com>
 :lang: de
 :source-highlighter: rouge
+:allow-uri-read:
+:toc:
 
 {toc}
 
@@ -37,13 +39,14 @@ Hierfür muss _Ruby_ und _Ruby-Gems_ installiert sein.
 ⬢[user@toolbox hsd-os]$ sudo dnf install -y rubygems
 ⬢[user@toolbox hsd-os]$ gem install bundler
 ⬢[user@toolbox hsd-os]$ bundle config --local github.https true
+⬢[user@toolbox hsd-os]$ bundle config set --local path '.bundle/gems'
 ----
 
 Die benötigten Gems sind in `Gemfile` aufgeführt und können mit dem Gem bundler installiert werden.
 
 [source,console]
 ----
-⬢[user@toolbox hsd-os]$ bundle --path=.bundle/gems --binstubs=.bundle/.bin
+⬢[user@toolbox hsd-os]$ bundle --binstubs=.bundle/.bin
 ----
 
 == Rendern von Asciidoc in PDF
