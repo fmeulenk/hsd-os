@@ -15,6 +15,8 @@ Es steht unter der http://creativecommons.org/licenses/by-sa/4.0/[Creative Commo
 Dokumente mit dem Suffix `.adoc` sind in https://asciidoctor.org/[Asciidoc] geschrieben.
 Dateien mit dem suffix `_slides.adoc` sind Präsentationen mit `reveal.js`.
 
+Die Folien enthalten teilweise auch Anmerkungen, die dann im PDF enthalten sind.
+
 == Vorbereitungen für die Verarbeitung von Asciidoc
 
 Es ist sehr empfehlenswert alle Tools in einer extra _Toolbox_ zu installieren.

@@ -13,3 +13,225 @@ Felix Meulenkamp <lix@redhat.com>
 
 [%notitle]
 == Einleitung
+
+* Den gleichen Servertyp zum tausendsten Mal aufsetzen?
+* Mal schnell zwanzing Iterationen eines Services durchtesten?
+* Jede Nacht den neusten Build in einer frischen Umgebung testen?
+
+== Eine Geschichte der Automatisierung
+
+__Ein empirischer Bericht aus Sicht eines Systemadministrators__
+
+=== Kopfkapital
+
+* Es war einst eine Zeit, da nur speziell geschulte Experten einen Server oder eine Anwendung installieren konnten
+* Das Wissen wurde nur im erwählten Kreis weitergereicht
+
+ifdef::backend-revealjs[=== !]
+
+* Jede Installation dauerte Tage und war anfällig für vergessense Schritte, Auslassungen und Tippfehler
+* Jeder Server wird  zur Schneeflocke
+* Außenstehende müssen sich eine Installation komplett neu erarbeiten
+
+=== Anleitungen und Checklisten
+
+* Alles begann mit der (heiligen) Installationsanleitung und runbooks
+* Jeder Schritt wurde dokumentiert und mit oft Screenshots versehen
+* Gute Anleitungen enthielten auch Schritte zur Kontrolle und Troubleshooting
+
+ifdef::backend-revealjs[=== !]
+
+* Installationen werden konsistenter dauern jedoch immer noch lange
+* Außenstehende können die Installation nachverfolgen, notfalls auch durchführen
+* Betrieb von Systemen wird einheitlicher und systematischer
+
+=== Bash und Co
+
+* Findige Administratoren codierten nach und nach alle wichtigen Schritte in Shell-skripte
+* Sed, Awk, Make sind weitere wichtige Bausteine
+* Einige Schritte sind jedoch schwer zu automatisieren
+
+ifdef::backend-revealjs[=== !]
+
+* zB. GUI-Eingaben lassen sich nur mit speziellen Frameworks automatisieren
+* Deshalb wird einfach die gespeicherte Konfiguration direkt angepasst
+* Echte Idempotenz ist schwer zu erreichen, da viele Tests nötig sind
+
+ifdef::backend-revealjs[=== !]
+
+Viele Server verwalten ist schwer:
+
+ifndef::backend-revealjs[.SSH-Loop zum Ändern einer Konfig auf mehreren Servern]
+[source,sh]
+----
+for i in 1 2 5 ;
+  do ssh web-${i} \
+    sed \
+      --in-place=bak \
+      s/blubb/blubb-blubb/g \
+      httpd.conf \
+    && systemctl restart httpd.service
+  done
+----
+
+Funktioniert das so?
+
+[%step]
+Nein!!
+
+ifdef::backend-revealjs[[.notes]]
+ifndef::backend-revealjs[[NOTE]]
+--
+Es würde nicht funktionieren.
+
+Der Pfad für `httpd.conf` ist nicht absolut und würde die Datei im Homeverzeichniss auf dem Server suchen, wo sie wahrscheinlich nicht liegt.
+`Sed` gibt uns in dem Fall einen Fehler aus, dass es die Datei nicht finden kann.
+Das Problem würden wir also schnell korrigieren.
+
+Gibt es weite Fehler mit dem `ssh` oder `systemctl`, muss das aus der Ausgabe gelesen werden; Für drei Server machbar, für Dutzende, eher nicht.
+Es gibt in der Ausgabe aber auch keinen Hinweis, auf welchen Server etwas fehlgeschlagen ist.
+
+Wird das Kommando ein zweites Mal ausgeführt, verdoppeln sich die ``blubb``s.
+Zudem wird das Backup mit jedem Lauf einfach überschrieben. +
+*=> fehlende Idempotenz*
+
+Außerdem, wir haben die `&&` nicht escaped, wodurch die lokale Shell und nicht die auf dem entfernten System den Befehl startet.
+Somit läuft im schlimmsten Fall der Service-Restart nur auf dem lokalen System.
+Falls wir nun lokal einen Apache Httpd laufen haben, fällt das nicht weiter auf, andernfalls, suchen wir vergeblich, warum auf dem entfernten System der Service nicht vorhanden sein soll.
+So wie es hier steht rettet uns kein Syntax Fehler der Shell, der SSH läuft ja fehlerfrei.
+
+Außerdem startet der Apache Httpd-Webserver nicht, wenn seine Konfig fehlerhaft ist. +
+*=> Im worst case:* Alle Webserver gehen bei einer Fehlkonfiguration offline!!
+
+Das `sed`-Kommando liefert auch Return Code `0`, wenn es nichts ersetzt, der Webserver wird also unnötig gestartet.
+Zumindest liefert es ungleich `0`, wenn die Datei nicht gefunden wird, was hier der Fall sein sollte.
+
+Der SSH und damit die ganze Schleife müsste unter Benutzer `root` laufen, da wir keinen Benutzer für den Loginin über SSH angegeben haben.
+Root-zugriff per Passwort ist oft auf Servern aus Sicherheitsgründen deaktiviert.
+Wir brauchen jedoch Root-Rechte da sonst der `systemctl` nicht funktioniert und auch die Httpd Konfig unter einen anderen Benutzer angelegt sein sollte.
+Die Lösung, vorher verteilte authorized SSH-Keys für `root` und passende `ssh-config` und `sshd-config`.
+
+Die Namen der Webserver sind nur als shortname und nicht als full qualified name (FQN) angegeben.
+Wird das Kommando so auf einem anderen Rechner ausgeführt und ändert sich die Search Domain, dann werden unter Umständen die Server nicht gefunden oder es trifft wohlmöglich die Falschen.
+Es reicht doch die _Stage_ nur in edn Namen der Subdomain einzubauen und nicht als Teil des Hostnamen, oder?
+
+Das Kommando lässt `web-3` und `web-4` bewust aus – Sagen wir: weil sie gerade in Wartung sind und der Webserver nicht gestartet werden soll, da dann die Loadbalancer diese wieder automatisch in den aktiven Pool aufnehmen würden.
+Wird auch wirklich daran gedacht, später die Konfiguration dieser anzupassen?
+
+*FAZIT:* Solche Gebilde sind oft sehr fragil und produzieren schnell Fehler und Seiteneffekte, die schwer zu finden sind.
+--
+
+=== Perl, Python und Ruby
+
+* Perl, Python und Ruby wurden früh genutzt, Automatisierungen zu vereinfachen
+* Für viele wiederkehrende Aufgaben gibt es eine Unzahl an Bibliotheken welche nur geeignet kombiniert werden müssen
+* zB direkte Manipulation von Datenbanken oder binär-Dateien
+
+ifdef::backend-revealjs[=== !]
+
+* Diese Sprachen sind jedoch komplexe Programmiersprachen, die ein tiefes Verständniss für Softwareprogrammierung erfordern und somit eine Hürde für viele Leute darstellen
+
+=== Konfigurationsmanagement
+
+* Die Konfiguration der verschiedenen Umgebungen war oftmals in den Anleitungen oder den Skripten enthalten
+* Das macht die Trennung der Zuständigkeiten schwer (Separation of Concerns)
+* Konfigurationen müssen teilweise auch Versioniert werden
+* Source Code Management-Systeme (SCM) wie RCS, CVS, Subversion und schließlich Git helfen dabei
+
+== Konfigurationmanagement-sprachen
+
+ifdef::backend-revealjs[=== !]
+
+* Die logische Weiterentwicklung sind dedizierte Konfigurationsmanagementsprachen
+* Konfigurationen werden abstrahiert
+* Prozeduren zum Einrichten werden standartisiert
+* Standartisierte Frameworks helfen Code wiederzuverwenden
+* Viele Sprachen haben große Bibliotheken mit gängigen Modulen
+
+ifdef::backend-revealjs[=== !]
+
+* Eine Trennung von Einrichtungscode, Operationscode und der eigendlichen Konfiguration der jeweiligen Umgebung wird so möglich
+* Code für die Infrastruktur kann nun ebenfalls ge-staged werden
+* In der jeweiligen Stage ändern sich dann nur noch konkrete Werte, zB. DNS- und NTP-Server
+* Der Code hierzu kann in SCM abgelegt werden
+
+=== Puppet
+
+* Puppet ist eine der ersten Sprachen
+* Ein zentrales Management und lokale Agenten
+* Agenten gleichen reglmäßig die Konfiguration ihres Systems mit der Soll-Konfiguration ab
+
+ifdef::backend-revealjs[=== Puppet httpd_conf]
+
+.fix_new_web_location.pp
+[source,puppet]
+----
+file_line {'httpd.conf':
+      path  => '/etc/httpd'
+      ensure  => present,
+      line => 'DocumentRoot /var/www/blubb-blubb',
+      match =>  '^DocumentRoot /var/www/blubb$',
+}
+----
+
+Wird mit `puppet apply fix_new_web_location.pp` auf den lokalen Rechner ausgeführt.
+Kann aber auch in eine Class eingebunden werden um für mehrere Server genutzt zu werden.
+
+=== Terraform
+
+* deklarative Sprache
+* Spezialisiert auf Cloudumgebungen
+* Ein XXX
+
+ifdef::backend-revealjs[=== Terraform Hello World]
+
+Hier ein Beispiel von https://developers.cloudflare.com/terraform/tutorial/hello-world
+
+.cloudflare.tf
+[source,terraform]
+----
+provider "cloudflare" {
+  email = "you@example.com"
+  api_key = "your-api-key"
+}
+resource "cloudflare_record" "www" {
+  domain  = "example.com"
+  name    = "www"
+  value   = "203.0.113.10"
+  type    = "A"
+  proxied = true
+}
+----
+
+=== Ansible
+
+* Ansible ist eine imperative Sprache
+* Kann per Cronjob auch Ist-Soll-Abgleich
+
+ifdef::backend-revealjs[=== Puppet httpd_conf]
+
+[source,yaml]
+----
+---
+- name: Set www document path
+  host: webservers
+  tasks:
+  - name: Fix httpd.conf
+    lineinfile:
+      path: '/etc/httpd/httpd.conf'
+      state: present
+      line: 'DocumentRoot /var/www/blubb-blubb'
+      regex: '^DocumentRoot /var/www/blubb$'
+      backup: yes
+    notify:
+    - Restart apache
+  handlers:
+    - name: Restart apache
+      ansible.builtin.service:
+        name: apache
+        state: restarted
+----
+
+== Infrastructure as Code
+
+* Konfigurationsmanagementsprachen erlauben es Definitionen für Sever zu erstellen und sie in Versionierungssystemen abzulegen
