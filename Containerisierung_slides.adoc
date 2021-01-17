@@ -1,0 +1,40 @@
+= Containerisierung
+Felix Meulenkamp <lix@redhat.com>
+// Metadata:
+:description: Ein Überblick über Containerisierung
+:keywords: docker, containerisierung, podman, buildah
+:license: Creative Commons Attribution-ShareAlike 4.0 International
+// Settings:
+:lang: de
+:idprefix: id_
+:source-highlighter: highlightjs
+// Refs:
+:url-project: https://github.com/fmeulenk/hsd-os
+
+[%notitle]
+== Einleitung
+
+* Nur ein Rechner zur Hand, brauchst aber 5?
+* Deine Hardware passt nicht zum Betriebssystem?
+* Ein Hack soll nicht alle deine Dienste betreffen?
+
+ifdef::backend-revealjs[=== !]
+
+== Weitere Informationen
+
+XXX
+Laborumgebung für Ansible unter +
+https://lab.redhat.com/ansible-introduction
+https://lab.redhat.com/ansible-web-server
+https://learn.openshift.com/
+https://learn.openshift.com/playgrounds/openshift46/
+
+ifdef::backend-revealjs[]
+== Fragen
+
+* Gibt es weitere Fragen?
+
+== Danke
+
+Vielen Dank für die Aufmerksamkeit!
+endif::[]

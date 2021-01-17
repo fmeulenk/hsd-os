@@ -1,0 +1,80 @@
+= Virtualisierung
+Felix Meulenkamp <lix@redhat.com>
+// Metadata:
+:description: Ein Überblick über Virtualisierung
+:keywords: libvirt, virtualization, kvm, qemu
+:license: Creative Commons Attribution-ShareAlike 4.0 International
+// Settings:
+:lang: de
+:idprefix: id_
+:source-highlighter: highlightjs
+// Refs:
+:url-project: https://github.com/fmeulenk/hsd-os
+
+[%notitle]
+== Einleitung
+
+* Nur ein Rechner zur Hand, brauchst aber 5?
+* Deine Hardware passt nicht zum Betriebssystem?
+* Ein Hack soll nicht alle deine Dienste betreffen?
+
+== !
+
+Was ist Virtualization
+
+== !
+
+XXX Unterschiede Para vs full vs X
+
+== Pet vs. Cattle
+
+ifdef::backend-revealjs[=== Pet vs. Cattle]
+
+* Single Host Virtualisierung
+* Virtualization Management
+* Clouds
+
+== Vagrant
+
+ifdef::backend-revealjs[=== Vagrant]
+
+Vagrant ist ein Kommando zum bauen und verwalten von Virtuellen Maschinen für verschiedene virtualisierungs Plattformen.
+
+ifdef::backend-revealjs[=== Vagrant]
+
+.Beispiel Vagrantfile
+[source,ruby]
+----
+Vagrant.configure("2") do |config|
+  config.vm.box = "hashicorp/bionic64"
+  config.vm.provision :shell, path: "bootstrap.sh"
+end
+----
+
+=== Resourcen
+
+// Links & Silberschatz
+.Links
+* https://www.vagrantup.com/
+
+
+
+// Leere Seite vor Ende
+ifdef::backend-revealjs[=== !]
+
+== Weitere Informationen
+
+XXX
+Laborumgebung für Ansible unter +
+https://lab.redhat.com/ansible-introduction
+https://lab.redhat.com/ansible-web-server
+
+ifdef::backend-revealjs[]
+== Fragen
+
+* Gibt es weitere Fragen?
+
+== Danke
+
+Vielen Dank für die Aufmerksamkeit!f
+endif::[]

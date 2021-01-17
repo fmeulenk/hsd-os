@@ -98,7 +98,8 @@ Zudem wird das Backup mit jedem Lauf einfach überschrieben. +
 Außerdem, wir haben die `&&` nicht escaped, wodurch die lokale Shell und nicht die auf dem entfernten System den Befehl startet.
 Somit läuft im schlimmsten Fall der Service-Restart nur auf dem lokalen System.
 Falls wir nun lokal einen Apache Httpd laufen haben, fällt das nicht weiter auf, andernfalls, suchen wir vergeblich, warum auf dem entfernten System der Service nicht vorhanden sein soll.
-So wie es hier steht rettet uns kein Syntax Fehler der Shell, der SSH läuft ja fehlerfrei.
+So wie es hier steht rettet uns auch kein Syntax Fehler der Shell, der SSH-Befehl läuft ja nach der ersten Korrektur fehlerfrei.
+Ssh gibt den exit status des ausgeführten Kommandos als eigenen return code zurück.
 
 Außerdem startet der Apache Httpd-Webserver nicht, wenn seine Konfig fehlerhaft ist. +
 *=> Im worst case:* Alle Webserver gehen bei einer Fehlkonfiguration offline!!
@@ -130,6 +131,7 @@ Wird auch wirklich daran gedacht, später die Konfiguration dieser anzupassen?
 ifdef::backend-revealjs[=== !]
 
 * Diese Sprachen sind jedoch komplexe Programmiersprachen, die ein tiefes Verständniss für Softwareprogrammierung erfordern und somit eine Hürde für viele Leute darstellen
+* Fast immer imperativ, es muss der Lösungsweg genau festgelegt werden
 
 === Konfigurationsmanagement
 
@@ -155,9 +157,13 @@ ifdef::backend-revealjs[=== !]
 * In der jeweiligen Stage ändern sich dann nur noch konkrete Werte, zB. DNS- und NTP-Server
 * Der Code hierzu kann in SCM abgelegt werden
 
+=== CFEngine
+
+* Erste Version von 1993
+* Policies beschreiben Systemzustände, welche von dem Agent hergestellt werden
+
 === Puppet
 
-* Puppet ist eine der ersten Sprachen
 * Ein zentrales Management und lokale Agenten
 * Agenten gleichen reglmäßig die Konfiguration ihres Systems mit der Soll-Konfiguration ab
 
@@ -205,11 +211,12 @@ resource "cloudflare_record" "www" {
 
 === Ansible
 
-* Ansible ist eine imperative Sprache
+* Braucht keine Agents, sondern nutzt SSH
 * Kann per Cronjob auch Ist-Soll-Abgleich
 
-ifdef::backend-revealjs[=== Puppet httpd_conf]
+ifdef::backend-revealjs[=== Ansible httpd_conf]
 
+.Ansible Playbook zum Ändern der httpd.conf
 [source,yaml]
 ----
 ---
@@ -224,14 +231,33 @@ ifdef::backend-revealjs[=== Puppet httpd_conf]
       regex: '^DocumentRoot /var/www/blubb$'
       backup: yes
     notify:
-    - Restart apache
+    - Restart Apache
   handlers:
-    - name: Restart apache
+    - name: Restart Apache
       ansible.builtin.service:
-        name: apache
+        name: httpd
         state: restarted
 ----
 
 == Infrastructure as Code
 
 * Konfigurationsmanagementsprachen erlauben es Definitionen für Sever zu erstellen und sie in Versionierungssystemen abzulegen
+* https://en.wikipedia.org/wiki/Infrastructure_as_code Abgerufen 2021-01-04
+
+ifdef::backend-revealjs[=== !]
+
+== Weitere Informationen
+
+Laborumgebung für Ansible unter +
+https://lab.redhat.com/ansible-introduction
+https://lab.redhat.com/ansible-web-server
+
+ifdef::backend-revealjs[]
+== Fragen
+
+* Gibt es weitere Fragen?
+
+== Danke
+
+Vielen Dank für die Aufmerksamkeit!
+endif::[]

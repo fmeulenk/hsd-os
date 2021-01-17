@@ -204,6 +204,8 @@ Das Kommando `getcap` zeigt uns gezielt die Capabilities von Programmen.
 * SElinux
 * AppaAmore
 
+ifdef::backend-revealjs[=== !]
+
 == Weitere Informationen
 
 Laborumgebung für SELinux unter +
@@ -216,6 +218,7 @@ Für `getfattr` zunächst das Paket `attr` installieren.
 # yum install -y attr
 ----
 
+ifdef::backend-revealjs[]
 == Fragen
 
 * Gibt es weitere Fragen?
@@ -223,3 +226,4 @@ Für `getfattr` zunächst das Paket `attr` installieren.
 == Danke
 
 Vielen Dank für die Aufmerksamkeit!
+endif::[]

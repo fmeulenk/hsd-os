@@ -103,11 +103,13 @@ Felix Meulenkamp <lix@redhat.com>
 
 * Regeln die Zugriffe zwischen SELinux Contexten regeln
 * Policies: Access Vector Rules
-* ``sesearch -A -s httpd_t -c file -ds ``
+* ``sesearch -A -s httpd_t -c file -ds``
 
 === Booleans
 
-*
+* SELinux Booleans bündeln verschiedene Policies und können zentral ein und ausschalten
+* Betriebsmodi können so schnell angepasst wiederzuverwenden
+* zB. `http_use_nfs` erlaubt den Httpd Prozessen auch auf NFS eingehängte Verzeichnisse zuzugreifen
 
 === MLS and MCS
 
@@ -171,6 +173,8 @@ Felix Meulenkamp <lix@redhat.com>
 * SElinux
 * AppaAmore
 
+ifdef::backend-revealjs[=== !]
+
 == Weitere Informationen
 
 Laborumgebung für SELinux unter +
@@ -183,6 +187,7 @@ Für `getfattr` zunächst das Paket `attr` installieren.
 # yum install -y attr
 ----
 
+ifdef::backend-revealjs[]
 == Fragen
 
 * Gibt es weitere Fragen?
@@ -190,3 +195,4 @@ Für `getfattr` zunächst das Paket `attr` installieren.
 == Danke
 
 Vielen Dank für die Aufmerksamkeit!
+endif::[]
