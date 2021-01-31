@@ -241,10 +241,24 @@ ifdef::backend-revealjs[=== Ansible httpd_conf]
 
 == Infrastructure as Code
 
+ifdef::backend-revealjs[=== Infrastructure as Code]
+
 * Konfigurationsmanagementsprachen erlauben es Definitionen für Sever zu erstellen und sie in Versionierungssystemen abzulegen
 * https://en.wikipedia.org/wiki/Infrastructure_as_code Abgerufen 2021-01-04
+* Hohe Redroduzierbarkeit der Server und Services
 
-ifdef::backend-revealjs[=== !]
+=== GitOps
+
+* Alle Konfigurationen und Definitionen der Server und Services liegen im SCM
+* Automatische Continious Deployment Piplines (CI/CD) starten bei Änedrung
+* Nach erfolgreichen Tests, automatisches Ausrollen in der nächsten Stage
+* Kein administrativer Zugang für die Zielsysteme mehr nötig
+* Alle Änderungen immer nachverfolgbar
+
+////
+== Patchmanagement
+
+////
 
 == Weitere Informationen
 

@@ -18,27 +18,155 @@ Felix Meulenkamp <lix@redhat.com>
 * Deine Hardware passt nicht zum Betriebssystem?
 * Ein Hack soll nicht alle deine Dienste betreffen?
 
-== !
+== Grundlagen
 
-Was ist Virtualization
+=== Was ist Virtualization
 
-== !
+Virtualisierung kann viele Dinge meinen.
+Wir beschäftigen uns hier mit der virt. von Computer Hardware, so dass wir ein vollständiges OS darauf installieren können.
 
-XXX Unterschiede Para vs full vs X
+
+=== Typen der Hypervisoren
+
+Man unterscheidet verschiedenen Typen der Virt.
+
+* Type 0 - Hardware basierend
+* Type 1 - OS basierend
+* Type 2 - Software basierend
+* Paravirtualization - Guest Unterstützt
+* Emulation - Emulation von anderer Hardware
+
+=== Type 0
+
+* Hardware unterstützt direkt die Virtualisierung
+* Meistens im Mainframe
+** IBM LPARs
+** Oracle LDOMs
+
+=== Type 1
+
+* Das OS ist speziell für die Virt. ausgelegt
+* Xen Project
+* VMware ESX
+
+ifdef::backend-revealjs[=== Type 1]
+
+Jedoch auch:
+
+* Hyper V
+* Linux KVM
+
+=== Type 2
+
+* Oracle VirtualBox
+* Parralels Desktop
+* Gnome Boxes
+
+=== Paravirtualization
+
+Einige HV brauchen eine gewisse Unterstüzung durch den Gast.
+
+* Bessere Resourcennutzung
+* Kommunikationkanal zwischen Gast und Host
+
+=== Emulation
+
+* Komplett in Software
+* kann auch andere CPUs oder spezielle Hardware emulieren
+* QEMU
+
+=== Mischungen
+
+Fast alle HV sind heute Mischtypen.
+Sie können einem bestimmten Type zugeordnet werden doch nutzen sie auch Features anderer Typen.
+
+* Guest-Tools
+* Emulation HW-Komponenten
+* Nutzung von KVM und Co
+* SR-IOV
+
+=== Resourcen
+
+// Links & Silberschatz
+.Links
+* KVM https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine (31.01.21)
+* Hardware Virt. https://en.wikipedia.org/wiki/Hardware_virtualization (31.01.21)
+
+.Silberschatz
+* 754ff Typen der Hypervisors
+
+== Motivation
+
+=== Vorteile
+
+* Höhere Nutzungsdichte
+* Isolation von Serveranwendungen / Services
+* Entkoppelung von Abhängigkeiten (Dependency Hell)
+* Bessere Automatisierung
+* Golden Images
+
+=== Nachteile
+
+* Overhead durch virt. Schicht
+* Lab-Angriffe auf Isolation
+* Overprovisioning führt zu Instabilitäten
+* Time-Screw in VMs
+* Single Point of Failure für mehrere Server
 
 == Pet vs. Cattle
 
 ifdef::backend-revealjs[=== Pet vs. Cattle]
 
+Zusammen mit zunehmender Automatisierung bildet sich eine Hierachie der Automatisierbarkeit.
+
 * Single Host Virtualisierung
-* Virtualization Management
+* Virtualization Management über mehrere Hosts
 * Clouds
 
-== Vagrant
+=== Einzelne Hypervisoren
 
-ifdef::backend-revealjs[=== Vagrant]
+* Kennen oft nur reduminäre Verwaltung
+* Desktop Virtualisierung
+* Eine VM wird von Hand erstellt und gewartet
+* Jede VM ist ein sorgfältig gepflegtes Haustier
+
+=== Klassische Virtualisierung
+
+* Verwaltung mehrere Hypervisors
+* Verwaltung gemeinsamen Storage, Netzwerk und anderer Resourcen
+* Unterstützung für Live-migration
+* VM werden eher wie ein Haustier gehandelt und repariert
+* VM Pools aus Templates sind jedoch oft schon unterstützt
+
+=== virt. Clouds
+
+* Alle Resourcen sind abstrahiert
+* VM werden immer aus vorgefertigten Images hergestellt
+* Installation und Konfiguration der Anwendung für gewöhnlich automatisiert
+* Ist eine VM defekt wird sie gelöscht und völlständig neu erzeugt
+
+=== Pet vs. Cattles
+
+Möchte ich eine Rudel Katzen oder Herde Schafe hüten?
+
+=== Pets
+
+* Jeder Server wird wie ein geliebtes Haustier behandelt und gepflegt
+* Der Pet-Ansatz ist gut zur Entwicklung neuer Funktionalitäten geeignet
+* Es kommt jedoch schnell zu *Schneeflocke*, Server, die so speziell sind, dass man die nicht mehr pflegen kann
+
+=== Cattles
+
+* Server und Dienste werden gecloned oder vollautomatisch Erstellt
+* Der Cattle-Ansatz benötigt deutlich mehr Vorbereitungen
+* Automatisierung muss zunächst geschrieben werden
+* Ermöglicht sehr schnelle Entwicklungszyklen
+
+
+=== Vagrant
 
 Vagrant ist ein Kommando zum bauen und verwalten von Virtuellen Maschinen für verschiedene virtualisierungs Plattformen.
+Es richtet sich an Entwickler die schnell gleichförmige Umgebungen aufbauen wollen.
 
 ifdef::backend-revealjs[=== Vagrant]
 
@@ -50,6 +178,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, path: "bootstrap.sh"
 end
 ----
+Source https://learn.hashicorp.com/tutorials/vagrant/getting-started-provisioning?in=vagrant/getting-started
 
 === Resourcen
 
