@@ -49,11 +49,11 @@ Felix Meulenkamp <lix@redhat.com>
 
 // Links & Silberschatz
 .Links
-* MAC: https://en.wikipedia.org/wiki/Mandatory_access_control
-* DAC: https://en.wikipedia.org/wiki/Discretionary_access_control
+* MAC: https://en.wikipedia.org/wiki/Mandatory_access_control (30.01.21)
+* DAC: https://en.wikipedia.org/wiki/Discretionary_access_control (30.01.21)
 
 .Silberschatz
-* XXX MAC
+* MAC: 734-735 /  DAC: 734
 
 == Motivation
 
@@ -72,7 +72,7 @@ Felix Meulenkamp <lix@redhat.com>
 === Eine Erfolgsstory
 
 * CVE-2019-5736 <https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux>
-* Schwachstelle im "runc" welches von vielen Container Runtimes benutzt wird, bei dem die executable über [/proc/self/exe](file:///proc/self/exe) überschreibbar war
+* Schwachstelle im "runc" welches von vielen Container Runtimes benutzt wird, bei dem die executable über `/proc/self/exe` überschreibbar war
 * SELinux hat dies geblockt
 
 === Resourcen
@@ -137,6 +137,14 @@ Felix Meulenkamp <lix@redhat.com>
 * SELinux komplex
 * Apparmor einfacher aber weniger leistungsfähig
 
+=== Resourcen
+
+// Links & Silberschatz
+.Links
+* https://github.com/SELinuxProject/selinux-notebook/blob/main/src/selinux_overview.md (30.1.2021)
+* https://stopdisablingselinux.com/ (30.1.2021)
+* https://major.io/2013/04/15/seriously-stop-disabling-selinux/ (30.1.2021)
+* https://danwalsh.livejournal.com/81756.html
 
 == AppAmor
 
@@ -171,9 +179,17 @@ Felix Meulenkamp <lix@redhat.com>
 * Capabilities (immer erstes Modul)
 * Seccomp
 * SElinux
-* AppaAmore
+* AppAmore
 
-ifdef::backend-revealjs[=== !]
+=== Resourcen
+
+// Links & Silberschatz
+.Links
+* MAC: https://en.wikipedia.org/wiki/Mandatory_access_control (30.01.21)
+* DAC: https://en.wikipedia.org/wiki/Discretionary_access_control (30.01.21)
+
+.Silberschatz
+* MAC: 734-735 /  DAC: 734
 
 == Weitere Informationen
 

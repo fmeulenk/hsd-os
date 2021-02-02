@@ -26,7 +26,7 @@ Virtualisierung kann viele Dinge meinen.
 Wir beschäftigen uns hier mit der virt. von Computer Hardware, so dass wir ein vollständiges OS darauf installieren können.
 
 
-=== Typen der Hypervisoren
+=== Typen der Virtualisierung
 
 Man unterscheidet verschiedenen Typen der Virt.
 
@@ -110,7 +110,7 @@ Sie können einem bestimmten Type zugeordnet werden doch nutzen sie auch Feature
 * Overhead durch virt. Schicht
 * Lab-Angriffe auf Isolation
 * Overprovisioning führt zu Instabilitäten
-* Time-Screw in VMs
+* Time-Skews in VMs
 * Single Point of Failure für mehrere Server
 
 == Pet vs. Cattle
@@ -178,7 +178,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, path: "bootstrap.sh"
 end
 ----
-Source https://learn.hashicorp.com/tutorials/vagrant/getting-started-provisioning?in=vagrant/getting-started
+Quelle https://learn.hashicorp.com/tutorials/vagrant/getting-started-provisioning?in=vagrant/getting-started
 
 === Resourcen
 
@@ -193,7 +193,6 @@ ifdef::backend-revealjs[=== !]
 
 == Weitere Informationen
 
-XXX
 Laborumgebung für Ansible unter +
 https://lab.redhat.com/ansible-introduction
 https://lab.redhat.com/ansible-web-server
@@ -205,5 +204,5 @@ ifdef::backend-revealjs[]
 
 == Danke
 
-Vielen Dank für die Aufmerksamkeit!f
+Vielen Dank für die Aufmerksamkeit!
 endif::[]
