@@ -1,0 +1,53 @@
+= Security-Enhanced Linux - Übungen
+Felix Meulenkamp <lix@redhat.com>
+// Metadata:
+:description: Übungen zu SElinux
+:keywords: selinux, syscalls, lsm
+:license: Creative Commons Attribution-ShareAlike 4.0 International
+// Settings:
+:lang: de
+:idprefix: id_
+:source-highlighter: highlightjs
+// Refs:
+:url-project: https://github.com/fmeulenk/hsd-os
+
+== Hinweis
+
+Zur Lösung dieser Aufgaben sind die Hilfe-Seiten der Kommandos sehr hilfreich.
+Das eingebaute Hilfesystem von Linux steht mit dem Befehl `man <command>` zur Verfügung.
+Einige Programme stellen auch ihre  vollständige Dokumentation mit dem Befehl `info <command>` dar.
+Das Kommando `man -k <Begriff>` hilft ihnen Hilfeseiten und Kommandos nach bestimmten Stichwörtern zu finden.
+
+== Zur Eingewöhnung
+
+Öffnen sie das Lab unter https://lab.redhat.com/selinux-containers
+und installieren sie das Packet `attr` und weitere Tools.
+
+`yum install -y attr setools setools-console.x86_64`
+
+Schauen wir uns nun die xAttribute an von SElinux an.
+
+`getfattr -n security.selinux anaconda-ks.cfg`
+
+== Aufgabe 1
+
+Finden sie Kommandos, die mit SElinux zu tun haben.
+
+Welche finden sie auf ihrer Laborumgebung?
+
+
+== Aufgabe 2
+
+Nutzen sie `semanage` um Booleans zu _httpd_ und _nfs_ zu finden.
+
+== Aufgabe 3
+
+Nutzen sie `sesearch` um Policies zu _httpd_ und _nfs_ zu finden.
+
+== Aufgabe 4
+
+Welche _File Kontexte_ gibt es unter `/var/www`?
+
+== Aufgabe 5
+
+Erlauben sie _httpd_ auch auf NFS Verzeichnisse zuzugreifen.
