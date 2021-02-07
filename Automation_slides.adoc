@@ -1,4 +1,4 @@
-= Automatisierung
+    = Automatisierung
 Felix Meulenkamp <lix@redhat.com>
 // Metadata:
 :description: Eine Geschichte der Automatisierung
@@ -187,7 +187,7 @@ Kann aber auch in eine Class eingebunden werden um für mehrere Server genutzt z
 
 * deklarative Sprache
 * Spezialisiert auf Cloudumgebungen
-* Ein XXX
+* Sehr gut geeignet große Cloudumgebungen aufzusetzen
 
 ifdef::backend-revealjs[=== Terraform Hello World]
 
@@ -213,6 +213,7 @@ resource "cloudflare_record" "www" {
 
 * Braucht keine Agents, sondern nutzt SSH
 * Kann per Cronjob auch Ist-Soll-Abgleich
+* Bis auf Python, keine Abhängigkeiten auf dem Zielsystem
 
 ifdef::backend-revealjs[=== Ansible httpd_conf]
 
@@ -228,7 +229,7 @@ ifdef::backend-revealjs[=== Ansible httpd_conf]
       path: '/etc/httpd/httpd.conf'
       state: present
       line: 'DocumentRoot /var/www/blubb-blubb'
-      regex: '^DocumentRoot /var/www/blubb$'
+      regex: '^DocumentRoot /var/www/blubb'
       backup: yes
     notify:
     - Restart Apache

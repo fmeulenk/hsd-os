@@ -14,20 +14,166 @@ Felix Meulenkamp <lix@redhat.com>
 [%notitle]
 == Einleitung
 
-* Nur ein Rechner zur Hand, brauchst aber 5?
-* Deine Hardware passt nicht zum Betriebssystem?
-* Ein Hack soll nicht alle deine Dienste betreffen?
+* Brauchst du mal schnell ein paar Tools zum debugging, aber möchtest dir den Server nicht versauen?
+* Hast du tausend Abhängigkeiten für deine Anwendung, die sich nicht mit anderen Anwendungen vertragen?
+* Bist du bereit für die ultimative Auslastung deiner Server?
 
-ifdef::backend-revealjs[=== !]
+== Definition
+
+ifdef::backend-revealjs[=== Definition]
+
+* Containerization
+* Application Containment
+* OS-level virtualization
+
+=== OS-level virtualization
+
+* Benutzung des Kernels des Hosts
+* Isolation durch Mittel des OS
+
+=== Vorteile
+
+* Separation of Concerns
+* Standartisierung
+* Definierte Betriebszustände
+* Definierte Schnittstellen
+* Keine Überbleibsel im System
+
+=== Nachteile
+
+* weniger isolation durch gemeinsamen Kernel
+* CPU Architektur fix
+* Ausbruch in den gemeinsamen Kernel leichter als bei Virt.
+* OS is "fix"
+
+=== Resourcen
+
+// Links & Silberschatz
+
+.Silberschatz
+* Application Containment 770,771
+
+== Wie funktioniert Containerisierung
+
+Viele Komponenten, die wir bereits kennen spielen für eine sichere Containerisierung zusammen.
+
+* Kernelnamespaces
+* cGroups
+* SElinux
+* Bind-Mounts
+* Capabilities
+
+=== Linux Namespaces
+
+Jeder Container bekommt seine eigene Namespaces.
+
+* Mount
+* Network
+* PID
+* User ID
+* UTS (hostname)
+* IPC
+* (upcomming) Time
+
+=== cgroups
+
+Control Groups v2
+
+* Resource limiting
+* Prioritization
+* Accounting
+* Control
+
+=== SElinux
+
+* Policies überwachen die Zugriffe zwischen den Resourcen
+* Jeder Container bekommt sein eigenes Range
+
+=== Bind-Mounts
+
+* Layered Filesystem
+* Mount Namespace
+* OverlayFS
+
+== Eine Geschichte der Container
+
+//Leer
+
+=== Containerrevolution
+
+* Stück- und Schüttgut logistisch sehr aufwendig
+* Bereits im 18Jhd. Entwicklung Behältertransport
+* In der Logistik wurden Ende der 1960er die modernen ISO-Container Standartisierte
+* Massive Einsparungen im Transport
+
+=== Chroots
+
+* Chroot seit den 80er
+* Jails auf BSD
+* Alle Abhängigkeiten liegen der Anwendung liegen in einem Subverzeichnis
+
+=== Isolation
+
+* Solaris Containers
+* LXC
+* OpenVZ (Open Virtuozzo)
+* Namespaces und cgroups
+
+=== Standartisierung
+
+* Docker
+* OCI - Open Container Initiative
+* Ganzes OS im Container
+* Standartisiertes Images format
+* Schnittstellen zur Automatisierung
+* Manifest Dateien
+
+=== Orchestration
+
+* OpenShift 2 / Pivotal
+* Borg
+* Doker Swarm
+* Kubernetes
+
+== Kubernetes
+
+Eine neue Art Betriebssystem
+
+=== Distros
+
+Kubernetes ist ein riesiges Projekt geworden.
+
+* CNCF - Cloud Native Computing Foundation
+* Hunderte Projekte, die auf Kubernetes laufen
+* Eine Auswahl ist nötig
+
+=== Abstrakstion aller Resourcen
+
+* Storage
+* Configuration & Secrets
+* Netzwerk
+* Logging
+* Scheduling
+
+ifdef::backend-revealjs[=== Abstrakstion aller Resourcen]
+
+* Unterschiedliche Configs für unterschiedliche Stages
+* Separation of Concerns
+* Beispiel Envoy in Istio liefert ganzes Service Mesh
+
+=== Automatisierung
+
+* Hohe Abstraktion und Konfigurierbarkeit ermöglicht Automatisierung
+* Zentrale API für die Steuerung aller Funktionen
+* CI/CD mit CT - Continious Testing - möglich
 
 == Weitere Informationen
 
-XXX
-Laborumgebung für Ansible unter +
-https://lab.redhat.com/ansible-introduction
-https://lab.redhat.com/ansible-web-server
+Laborumgebung für Podman unter +
+https://lab.redhat.com/podman-deploy
+
+Laborumgebung für OpenShift unter +
 https://learn.openshift.com/
-https://learn.openshift.com/playgrounds/openshift46/
 
 ifdef::backend-revealjs[]
 == Fragen
