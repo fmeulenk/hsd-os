@@ -1,0 +1,41 @@
+= Containerisierung - Übungen
+Felix Meulenkamp <lix@redhat.com>
+// Metadata:
+:description: Übungen zu Containerisierung
+:keywords: podman, oci, docker
+:license: Creative Commons Attribution-ShareAlike 4.0 International
+// Settings:
+:lang: de
+:idprefix: id_
+:source-highlighter: highlightjs
+// Refs:
+:url-project: https://github.com/fmeulenk/hsd-os
+
+== Hinweis
+
+Zur Lösung dieser Aufgaben sind die Hilfe-Seiten der Kommandos sehr hilfreich.
+Das eingebaute Hilfesystem von Linux steht mit dem Befehl `man <command>` zur Verfügung.
+Einige Programme stellen auch ihre  vollständige Dokumentation mit dem Befehl `info <command>` dar.
+Das Kommando `man -k <Begriff>` hilft ihnen Hilfeseiten und Kommandos nach bestimmten Stichwörtern zu finden.
+
+Alle POSIX kompatiblen Programme haben eine Option `--help`, welche eine kurze Zusammenfassung der Kommandozeilenargumente anzeigt.
+
+== Das Lab
+
+Öffnen sie das Lab unter https://lab.redhat.com/podman-deploy .
+
+Im Rahmen der Übung erstellen wir einen einfachen Container mit einem Webserver.
+
+Das Kommando `podman` ist eine Alternative zu Docker und nutzt zu großen Teilen die gleiche Kommando- und Parameterstrukturen.
+Das Kommando `buildah` übernimmt dabei die Funktionalitäten eines Containerbuilds.
+
+Mit `podman run` und anschließenden `podman commit` können einfach und schnell neue Containerimages erstellt werden.
+
+docker.io/library/debian
+registry.access.redhat.com/ubi8
+
+== Aufgabe 1
+
+== Aufgabe 2
+
+== Aufgabe 3
