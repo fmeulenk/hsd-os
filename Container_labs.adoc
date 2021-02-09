@@ -26,16 +26,84 @@ Alle POSIX kompatiblen Programme haben eine Option `--help`, welche eine kurze Z
 
 Im Rahmen der Übung erstellen wir einen einfachen Container mit einem Webserver.
 
-Das Kommando `podman` ist eine Alternative zu Docker und nutzt zu großen Teilen die gleiche Kommando- und Parameterstrukturen.
+Das Kommando `podman` ist container runtime engine für OCI-compatible Container.
+Es ist eine Alternative zu Docker und nutzt zu großen Teilen die gleiche Kommando- und Parameterstrukturen.
 Das Kommando `buildah` übernimmt dabei die Funktionalitäten eines Containerbuilds.
 
 Mit `podman run` und anschließenden `podman commit` können einfach und schnell neue Containerimages erstellt werden.
 
-docker.io/library/debian
-registry.access.redhat.com/ubi8
+Zur Übung wollen wir einen einfachen Webserver erstellen.
 
-== Aufgabe 1
 
-== Aufgabe 2
+Zunächst laden wird das benötigte Image herunter.
 
-== Aufgabe 3
+[source,console]
+----
+podman pull ubi8/ubi-init
+----
+
+Dies läd die einzelnen Layer des Images `registry.access.redhat.com/ubi8/ubi-init` herunter und speichert sie unter `/var/lib/containers`.
+
+Wir können nun aus dem Image einen Container erstellen und in diesem Software installieren
+
+[source]
+----
+[root@4d0e7a3a24a3 ~]# podman run -ti --entrypoint bash ubi8/ubi-init
+[root@fb2dcef562f1 /]#
+----
+
+Wir sehen das der Hostname sich ändert.
+Das Parameter `-ti` steht für TTY anhängen (`-t`) und Interactiver Modus (`-i`), welche zu einem Parameter zusammen gezogen wurden, wie es unter dem Posix-Standard für Kurz-Parameter erlaubt ist.
+
+Nun installieren und aktivieren wir den Apache HTTPd Server.
+
+[source]
+----
+yum -y install httpd && yum clean all
+systemctl enable httpd
+exit
+----
+
+Das `&& yum clean all` bewirkt, das nach der erfolgreichen Installation direkt alle ge-cache-ten Datein wieder gelöscht werden.
+Es ist im Interaktiven Mode nicht so wichtig dies direkt in einem Kommando zu vereinen, jedoch in einem `RUN`-Statement eines Containerbuilds, wäre dies so üblich, um zu verhindern, dass für die zwischengespeicherten RPM-Datein ein Layer angelegt wird.
+
+Mit `exit` wurde der Container wieder verlassen.
+Da kein `--rm` beim `podman run` gesetzt wurde, bleibt der Container erhalten und kann mit `podman ps -a` gelistet werden.
+
+Wir erzeugen nun ein neues Image aus dem gestoppten Container.
+Hierfür listen wir ihn und benutzen dann `podman commit` um ihn unter dem Namen `my-httpd` zu speichern.
+
+Mit `podman images` kann man sich alle lokalen Images anzeigen lassen.
+
+podman run -dt -p 8081:80/tcp my-httpd
+ setsebool -P container_manage_cgroup 1
+ podman run -td --name web --log-level=debug -p 8081:80/tcp --entrypoint /sbin/init  my-httpd
+
+
+
+podman run -v $PWD:/data:z ascii asciidoctor-pdf test.adoc
+
+63  podman run -ti --name a1 ubi8
+64  podman commit -c WORKDIR=/data a1 ascii:latest
+65  mkdir text
+66  cd text/
+67  vi test.adoc
+69  podman run -v $PWD:/data:z ascii asciidoctor test.adoc
+71  podman run -v $PWD:/data:z ascii asciidoctor-pdf test.adoc
+73  less test.html
+
+[source,asciidoc]
+----
+cat << EOF >> test.adoc
+= Test Dok
+Felix Meulenkamp
+
+== 1 Kap
+
+Test
+
+== 2 Kap
+
+Mehr test
+EOF
+----

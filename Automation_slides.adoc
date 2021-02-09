@@ -1,4 +1,4 @@
-    = Automatisierung
+= Automatisierung
 Felix Meulenkamp <lix@redhat.com>
 // Metadata:
 :description: Eine Geschichte der Automatisierung

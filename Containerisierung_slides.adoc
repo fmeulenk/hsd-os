@@ -1,4 +1,4 @@
-= Containerisierung
+= Container
 Felix Meulenkamp <lix@redhat.com>
 // Metadata:
 :description: Ein Überblick über Containerisierung
@@ -130,7 +130,8 @@ Control Groups v2
 
 === Orchestration
 
-* OpenShift 2 / Pivotal
+* Pivotal Cloud Foundry
+* Red Hat OpenShift 2
 * Borg
 * Doker Swarm
 * Kubernetes
