@@ -24,7 +24,7 @@ Alle POSIX kompatiblen Programme haben eine Option `--help`, welche eine kurze Z
 
 Öffnen sie das Lab unter https://lab.redhat.com/podman-deploy .
 
-Im Rahmen der Übung erstellen wir einen einfachen Container mit einem Webserver.
+Im Rahmen der Übung erstellen wir einen einfachen Container mit einem Renderer für die Vorlesungsunterlagen.
 
 Das Kommando `podman` ist container runtime engine für OCI-compatible Container.
 Es ist eine Alternative zu Docker und nutzt zu großen Teilen die gleiche Kommando- und Parameterstrukturen.
@@ -39,28 +39,31 @@ Zunächst laden wird das benötigte Image herunter.
 
 [source,console]
 ----
-podman pull ubi8/ubi-init
+podman pull fedora:33
 ----
 
-Dies läd die einzelnen Layer des Images `registry.access.redhat.com/ubi8/ubi-init` herunter und speichert sie unter `/var/lib/containers`.
+Dies läd die einzelnen Layer des Images `docker.io/library/fedora:33` herunter und speichert sie unter `/var/lib/containers`.
+
+Mit `podman images` können wir sehen, welche Images bereits lokal vorhanden sind.
 
 Wir können nun aus dem Image einen Container erstellen und in diesem Software installieren
 
 [source]
 ----
-[root@4d0e7a3a24a3 ~]# podman run -ti --entrypoint bash ubi8/ubi-init
-[root@fb2dcef562f1 /]#
+[root@1b0a838cf4f5 $]# podman run -ti fedora:33
+[root@58f03d2910c9 /]#
 ----
 
 Wir sehen das der Hostname sich ändert.
 Das Parameter `-ti` steht für TTY anhängen (`-t`) und Interactiver Modus (`-i`), welche zu einem Parameter zusammen gezogen wurden, wie es unter dem Posix-Standard für Kurz-Parameter erlaubt ist.
 
-Nun installieren und aktivieren wir den Apache HTTPd Server.
+Nun installieren wir das Tool Asciidoctor und ein paar Plugins.
 
 [source]
 ----
-yum -y install httpd && yum clean all
-systemctl enable httpd
+yum -y install gem && yum clean all
+gem asciidoctor asciidoctor-pdf asciidoctor-revealjs rouge
+mkdir /data
 exit
 ----
 
@@ -71,39 +74,42 @@ Mit `exit` wurde der Container wieder verlassen.
 Da kein `--rm` beim `podman run` gesetzt wurde, bleibt der Container erhalten und kann mit `podman ps -a` gelistet werden.
 
 Wir erzeugen nun ein neues Image aus dem gestoppten Container.
-Hierfür listen wir ihn und benutzen dann `podman commit` um ihn unter dem Namen `my-httpd` zu speichern.
+Hierfür listen wir ihn und benutzen dann `podman commit` um ihn unter dem Namen `ad:latest` zu speichern.
+
+[source]
+----
+podman commit -c WORKDIR=/data <container_name | id> ascii:latest
+----
+
+Die Option `-c WORKDIR=/data` sorgt dafür, dass das Arbeitsverzeichnis aud `/data` gesetzt wird.
 
 Mit `podman images` kann man sich alle lokalen Images anzeigen lassen.
 
-podman run -dt -p 8081:80/tcp my-httpd
- setsebool -P container_manage_cgroup 1
- podman run -td --name web --log-level=debug -p 8081:80/tcp --entrypoint /sbin/init  my-httpd
+Als nächstes Clonen wir das Git-Repository mit den Vorlesungsunterlagen.
 
-
-
-podman run -v $PWD:/data:z ascii asciidoctor-pdf test.adoc
-
-63  podman run -ti --name a1 ubi8
-64  podman commit -c WORKDIR=/data a1 ascii:latest
-65  mkdir text
-66  cd text/
-67  vi test.adoc
-69  podman run -v $PWD:/data:z ascii asciidoctor test.adoc
-71  podman run -v $PWD:/data:z ascii asciidoctor-pdf test.adoc
-73  less test.html
-
-[source,asciidoc]
+[source]
 ----
-cat << EOF >> test.adoc
-= Test Dok
-Felix Meulenkamp
-
-== 1 Kap
-
-Test
-
-== 2 Kap
-
-Mehr test
-EOF
+git clone https://github.com/fmeulenk/hsd-os.git
+cd hsd-os
 ----
+
+Nun können das frische Image nutzen um die AsciiDoc Dateien in HTML und PDF Datein zu übersetzen.
+
+[source]
+----
+podman run --rm -v$PWD:/data:z ascii asciidoctor-pdf --allow-uri-read *.adoc
+podman run --rm -v$PWD:/data:z ascii asciidoctor-revealjs \
+  -a revealjsdir=https://cdn.jsdelivr.net/npm/reveal.js@3.9.2  *_slides.adoc
+----
+
+Nun fehlt uns leider ein Web-Browser in der Lab-Umgebung.
+Jedoch haben wir ein Lab mit Port-Umleitung für den Port 8081
+
+Das das Image auch Phyton enthält, können wir einfach einen kleinen Webserver starten.
+
+[source]
+----
+podman run --rm -v$PWD:/data:z -p 8081:8000/tcp ascii python3 -m http.server
+----
+
+Jetzt können wir uns die Seiten über den Reiter "Container Service" anschauen.
