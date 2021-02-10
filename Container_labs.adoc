@@ -97,7 +97,7 @@ Nun können das frische Image nutzen um die AsciiDoc Dateien in HTML und PDF Dat
 
 [source]
 ----
-podman run --rm -v$PWD:/data:z ascii asciidoctor-pdf --allow-uri-read *.adoc
+podman run --rm -v$PWD:/data:z ascii asciidoctor-pdf -a allow-uri-read *.adoc
 podman run --rm -v$PWD:/data:z ascii asciidoctor-revealjs \
   -a revealjsdir=https://cdn.jsdelivr.net/npm/reveal.js@3.9.2  *_slides.adoc
 ----
